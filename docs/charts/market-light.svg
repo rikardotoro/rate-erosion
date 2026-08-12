@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="340" viewBox="0 0 760 340" role="img">
+<text x="20.0" y="26.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">Your cost vs the market</text>
+<text x="20.0" y="44.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e" text-anchor="start" font-weight="normal" style="">Indexed to 100 at the start of the demo contract. The gap is the outperformance.</text>
+<line x1="52.0" y1="280.9" x2="610.0" y2="280.9" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="284.9" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">100</text>
+<line x1="52.0" y1="246.7" x2="610.0" y2="246.7" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="250.7" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">110</text>
+<line x1="52.0" y1="212.6" x2="610.0" y2="212.6" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="216.6" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">120</text>
+<line x1="52.0" y1="178.4" x2="610.0" y2="178.4" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="182.4" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">130</text>
+<line x1="52.0" y1="144.3" x2="610.0" y2="144.3" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="148.3" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">140</text>
+<line x1="52.0" y1="110.1" x2="610.0" y2="110.1" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="114.1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">150</text>
+<path d="M 52.0 280.9 L 85.5 282.5 L 115.8 286.3 L 149.3 274.2 L 181.8 275.1 L 215.3 267.2 L 247.7 274.2 L 281.3 246.2 L 314.8 242.6 L 347.2 237.9 L 380.7 260.0 L 413.2 268.5 L 446.7 259.9 L 480.2 264.0 L 510.5 260.6 L 544.0 241.0 L 576.5 230.0 L 610.0 231.9" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 52.0 280.9 L 85.5 271.3 L 115.8 264.6 L 149.3 253.2 L 181.8 237.2 L 215.3 220.5 L 247.7 216.5 L 281.3 222.9 L 314.8 208.6 L 347.2 196.7 L 380.7 200.8 L 413.2 186.2 L 446.7 184.6 L 480.2 184.3 L 510.5 197.2 L 544.0 160.9 L 576.5 100.5 L 610.0 109.6" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<text x="620.0" y="113.6" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#2a78d6" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;">market 150</text>
+<text x="620.0" y="235.9" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#eb6834" text-anchor="start" font-weight="600" style="font-variant-numeric: tabular-nums;">you 114</text>
+<text x="52.0" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Jan 21</text>
+<text x="149.3" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Apr 21</text>
+<text x="247.7" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Jul 21</text>
+<text x="347.2" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Oct 21</text>
+<text x="446.7" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Jan 22</text>
+<text x="544.0" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Apr 22</text>
+<line x1="52.0" y1="300.0" x2="610.0" y2="300.0" stroke="#c3c2b7" stroke-width="1.2"/>
+</svg>
