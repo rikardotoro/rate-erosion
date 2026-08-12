@@ -134,3 +134,39 @@ def load_contract(path: Path) -> pd.DataFrame:
         row = int(bad.idxmax())
         raise InvalidDataError(f"row {row}: base_rate must be a positive number")
     return contract.reset_index(drop=True)
+
+
+def parse_period(text: str) -> tuple[pd.Timestamp, pd.Timestamp]:
+    match = re.fullmatch(r"(\d{4}-\d{2}):(\d{4}-\d{2})", text.strip())
+    if not match:
+        raise InvalidDataError(
+            f"period {text!r} is not in YYYY-MM:YYYY-MM format, e.g. 2024-01:2024-06"
+        )
+    start = pd.Timestamp(match.group(1) + "-01")
+    end = pd.Timestamp(match.group(2) + "-01") + pd.offsets.MonthEnd(0)
+    if end < start:
+        raise InvalidDataError(f"period {text!r} ends before it starts")
+    return start, end
+
+
+def _slice(frame: pd.DataFrame, label: str) -> pd.DataFrame:
+    start, end = parse_period(label)
+    picked = frame[(frame["date"] >= start) & (frame["date"] <= end)]
+    if picked.empty:
+        raise InsufficientDataError(f"no cost lines fall inside {label}")
+    return picked.reset_index(drop=True)
+
+
+def split_periods(
+    frame: pd.DataFrame,
+    baseline: str | None = None,
+    current: str | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame, str, str]:
+    months = frame["date"].dt.to_period("M").sort_values().unique()
+    if baseline is None:
+        first = months[: min(3, len(months))]
+        baseline = f"{first[0]}:{first[-1]}"
+    if current is None:
+        last = months[-min(3, len(months)):]
+        current = f"{last[0]}:{last[-1]}"
+    return _slice(frame, baseline), _slice(frame, current), baseline, current
