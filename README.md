@@ -1,5 +1,279 @@
 # rate-erosion
 
-You negotiated -8%. You paid +3%. Here is where it went.
+[![CI](https://github.com/rikardotoro/rate-erosion/actions/workflows/ci.yml/badge.svg)](https://github.com/rikardotoro/rate-erosion/actions/workflows/ci.yml)
 
-(Full README arrives with the first release.)
+**You negotiated −8%. You paid +3%. Here is where it went.**
+
+A negotiated rate reduction is a headline, not an outcome. Over the contract
+term it erodes — the base gets quietly over-billed, surcharges creep, a
+peak-season charge appears, the exchange rate moves, and your traffic drifts
+toward the expensive lane. None of that shows up in a report that compares
+"contracted rate" to "contracted rate". This tool reads your cost lines,
+decomposes the gap between what you signed and what you actually paid, and
+then answers the question that decides whether procurement did a good job:
+**how did you do against the market?**
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/waterfall-dark.svg">
+  <img alt="Waterfall chart of per-shipment cost: a contracted base of 2,199 dollars builds up through base rate creep, bunker surcharge, terminal handling, peak season surcharge and documentation fees to a realised all-in cost of 3,183 dollars." src="docs/charts/waterfall-light.svg" width="760">
+</picture>
+
+## The 30-second version
+
+```bash
+uvx --from git+https://github.com/rikardotoro/rate-erosion rate-erosion --demo
+```
+
+<!-- BEGIN OUTPUT -->
+```
+Per-shipment cost —        
+         2022-04:2022-06          
+┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Step            ┃ $ / shipment ┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ Contracted base │        2,199 │
+│ Base rate creep │          +53 │
+│ BAF             │         +453 │
+│ THC             │         +233 │
+│ PSS             │         +200 │
+│ DOC             │          +45 │
+│ Realised all-in │        3,183 │
+└─────────────────┴──────────────┘
+       Change       
+ 2021-01:2021-03 →  
+  2022-04:2022-06   
+   (total spend)    
+┏━━━━━━━━┳━━━━━━━━━┓
+┃ Effect ┃       $ ┃
+┡━━━━━━━━╇━━━━━━━━━┩
+│ Volume │ +16,696 │
+│ Price  │ +59,531 │
+│ Mix    │ +19,136 │
+│ Fx     │  -2,944 │
+│ Total  │ +92,419 │
+└────────┴─────────┘
+
+Realised cost per shipment moved +14.4% (183 shipments in 2021-01:2021-03, 189 
+in 2022-04:2022-06).
+The market (PPI: Deep Sea Freight Transportation (BLS)) moved +50.2% over the 
+same window — you outperformed by 35.8% points.
+```
+<!-- END OUTPUT -->
+
+Three answers in one screen: **where** the money went (the waterfall),
+**why** total spend moved (volume, price, mix, FX — summing exactly to the
+total, no unexplained residual), and **whether to be angry about it** (the
+market verdict).
+
+## Why "contracted vs paid" is the wrong comparison
+
+Two separate mistakes hide in most freight cost reviews:
+
+1. **The gap is treated as one number.** "We're paying 14% more per box" is
+   not actionable. *Which part* is the carrier over-billing the base, which
+   part is bunker, which part is your own lane mix shifting? Each has a
+   different owner and a different fix. The waterfall above splits the demo's
+   gap into five named pieces.
+
+2. **The change is compared to nothing.** In the demo, realised cost per
+   shipment rises 14% over the contract term — sounds like a procurement
+   failure. Over the same window the market rose 50%. Locking a contract that
+   only leaked 14 points in that market was an excellent outcome, and a
+   report that can't say so punishes the people who earned it. Erosion and
+   outperformance are different questions; you need both answers.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/market-dark.svg">
+  <img alt="Line chart indexing your per-shipment cost against the Deep Sea Freight PPI, both starting at 100 in January 2021. Your cost ends at 114 while the market ends at 150 — the gap is the outperformance." src="docs/charts/market-light.svg" width="760">
+</picture>
+
+There is a third, quieter mistake: **letting FX and mix pollute the price
+line.** A euro-denominated handling charge that didn't change in euros is not
+a rate increase, and more shipments on the expensive lane is not a carrier
+price rise. The tool revalues both periods at constant exchange rates and
+splits mix from price with the standard variance identity, so each effect
+lands in its own row — and the four rows sum to the total change exactly.
+
+## Do this in your own tools
+
+You don't need this tool to stop reporting one blended number. The pieces are
+one formula away in whatever you already use:
+
+**Excel**
+
+Per-shipment cost of each charge type — a pivot of amount by charge code, or:
+
+```
+=SUMIFS(amount, charge_code, "BAF") / SUMPRODUCT(1/COUNTIF(shipments, shipments))
+```
+
+Build it once per period and the waterfall is a bar chart away.
+
+**Power BI (DAX)**
+
+```
+Price Effect :=
+SUMX(
+    VALUES(Shipments[lane]),
+    [Cur Shipments] * ([Cur Unit Cost] - [Base Unit Cost])
+)
+```
+
+Mix and volume follow the same `SUMX` pattern with the reference costs
+swapped — this is textbook price/volume/mix variance, which is exactly the
+point: it's a core BI technique that freight reporting rarely uses.
+
+**SQL**
+
+```sql
+SELECT charge_code,
+       SUM(amount) / COUNT(DISTINCT shipment) AS per_shipment
+FROM cost_lines
+WHERE date BETWEEN '2022-04-01' AND '2022-06-30'
+GROUP BY charge_code
+ORDER BY per_shipment DESC;
+```
+
+Run it for both periods and subtract.
+
+None of these stop FX or lane mix from polluting the price line, and none of
+them benchmark you against the market — isolating the effects exactly and
+attaching the FRED verdict is what the tool adds.
+
+## Four ways to get this wrong
+
+Each is a real mistake from real cost reviews, and each has a test proving
+the failure mode:
+
+1. **Reaching for the Baltic Dry Index because it's the famous one.** It
+   measures dry bulk — iron ore, grain, coal — not containers. The tool
+   refuses it, by name, and tells you why.
+   → [`tests/test_benchmark.py::test_baltic_dry_index_is_refused_with_explanation`](tests/test_benchmark.py)
+
+2. **Booking a mix shift as a price change.** If per-lane prices are flat and
+   your volume moved to the dear lane, the price effect must be zero.
+   → [`tests/test_decompose.py::test_mix_shift_is_not_booked_as_price`](tests/test_decompose.py)
+
+3. **Booking FX movement as a rate change.** A charge that didn't move in its
+   own currency is not a carrier increase.
+   → [`tests/test_decompose.py::test_fx_movement_is_not_a_rate_change`](tests/test_decompose.py)
+
+4. **Comparing your rate change to nothing.** +14% is a disaster in a flat
+   market and a triumph in 2021-22. The verdict is relative or it is
+   meaningless.
+   → [`tests/test_benchmark.py::test_verdict_reports_relative_points`](tests/test_benchmark.py)
+
+## Run it
+
+```bash
+uvx --from git+https://github.com/rikardotoro/rate-erosion rate-erosion --demo
+uvx --from git+https://github.com/rikardotoro/rate-erosion rate-erosion \
+  --data cost_lines.csv --contract contract.csv \
+  --baseline 2025-01:2025-03 --current 2026-04:2026-06
+```
+
+**Cost lines CSV** (column names auto-detected from common aliases; force any
+mapping with `--map canonical=your_column`):
+
+| Column | Required | Meaning |
+|---|---|---|
+| `shipment` | yes | Shipment / BL / container reference |
+| `date` | yes | Charge or invoice date |
+| `lane` | yes | Trade lane the shipment moved on |
+| `charge_code` | yes | BAS, BAF, THC, PSS… base codes fold into "base" |
+| `amount` | yes | Charge amount in its own currency |
+| `currency` | no | Defaults to USD |
+| `fx_rate` | no | Units of contract currency per unit of line currency |
+
+**Contract CSV**: `lane`, `base_rate` (per shipment, contract currency).
+
+Options: `--baseline`/`--current` pick the comparison windows (default:
+first vs last three months of the data); `--benchmark` picks the FRED series
+(`PCU483111483111` deep-sea PPI by default, `PCU4883204883208` container
+handling, `FRGSHPUSM649NCIS` Cass shipments, or `none`); `--json` for
+machine-readable output.
+
+## What this doesn't do
+
+- **It does not tell you whether a surcharge was legitimate.** It tells you
+  which surcharge ate your savings; arguing about it is your job.
+- **It needs a contracted rate per lane.** No contract file, no waterfall —
+  the tool has nothing to compare against.
+- **The FRED benchmarks are US PPI-based proxies, not lane-level spot
+  rates.** Professionals use SCFI, WCI or FBX for lane pricing; those are
+  subscription products whose free tiers cover headline values only, so this
+  tool uses genuinely free series and says so.
+- **The demo cost lines are synthetic.** Real invoice-level freight data is
+  effectively never published, so [`scripts/make_demo.py`](scripts/make_demo.py)
+  generates a realistic erosion story with a fixed seed and
+  [`examples/SOURCE.md`](examples/SOURCE.md) discloses it plainly. The market
+  benchmark in the demo is **real** — the actual BLS Deep Sea Freight PPI,
+  which really did rise 50% over the demo's 2021-22 contract term.
+
+## Is any of this actually tested?
+
+All of it. Every claim in this README is enforced by a test — each trap in
+"Four ways to get this wrong" links to the test that proves it, the
+decomposition's exactness (effects sum to the total, no residual) is itself a
+test, and the demo output above is generated by running the tool, never
+pasted in. The suite runs in CI on every push, against Python 3.11 and 3.12.
+
+<details>
+<summary><strong>The full test list</strong> — regenerated by <code>scripts/render_readme_output.py</code>, so it can't drift</summary>
+
+<!-- BEGIN TESTS -->
+```
+44 passed
+
+tests/test_benchmark.py::test_default_series_is_registered PASSED
+tests/test_benchmark.py::test_resolve_accepts_a_known_id PASSED
+tests/test_benchmark.py::test_baltic_dry_index_is_refused_with_explanation PASSED
+tests/test_benchmark.py::test_unknown_series_lists_the_supported_ones PASSED
+tests/test_benchmark.py::test_load_series_parses_fredgraph_csv PASSED
+tests/test_benchmark.py::test_pct_change_uses_asof_values PASSED
+tests/test_benchmark.py::test_verdict_reports_relative_points PASSED
+tests/test_cli.py::test_cli_runs_and_reports PASSED
+tests/test_cli.py::test_cli_json_output_is_valid PASSED
+tests/test_cli.py::test_cli_refuses_baltic_dry PASSED
+tests/test_data.py::test_detects_canonical_names PASSED
+tests/test_data.py::test_detects_common_aliases PASSED
+tests/test_data.py::test_override_beats_detection PASSED
+tests/test_data.py::test_missing_required_column_names_the_column PASSED
+tests/test_data.py::test_base_codes_are_recognised_case_insensitively PASSED
+tests/test_data.py::test_load_defaults_currency_and_fx PASSED
+tests/test_data.py::test_unparseable_date_names_the_row PASSED
+tests/test_data.py::test_non_numeric_amount_names_the_row PASSED
+tests/test_data.py::test_load_contract PASSED
+tests/test_data.py::test_contract_rejects_non_positive_rate PASSED
+tests/test_decompose.py::test_effects_sum_exactly_to_total_change PASSED
+tests/test_decompose.py::test_mix_shift_is_not_booked_as_price PASSED
+tests/test_decompose.py::test_fx_movement_is_not_a_rate_change PASSED
+tests/test_decompose.py::test_pure_volume_change PASSED
+tests/test_decompose.py::test_new_lane_in_current_period_does_not_crash PASSED
+tests/test_demo_data.py::test_demo_files_are_small PASSED
+tests/test_demo_data.py::test_demo_loads_and_spans_the_contract_term PASSED
+tests/test_demo_data.py::test_demo_is_reproducible PASSED
+tests/test_demo_data.py::test_offline_fred_slice_loads PASSED
+tests/test_periods.py::test_parse_period_is_month_inclusive PASSED
+tests/test_periods.py::test_parse_period_rejects_garbage PASSED
+tests/test_periods.py::test_explicit_periods_select_rows PASSED
+tests/test_periods.py::test_default_periods_are_first_and_last_three_months PASSED
+tests/test_periods.py::test_empty_period_raises PASSED
+tests/test_report.py::test_analysis_counts_and_change PASSED
+tests/test_report.py::test_verdict_included_when_market_given PASSED
+tests/test_report.py::test_to_dict_is_json_serialisable PASSED
+tests/test_smoke.py::test_version_is_exposed PASSED
+tests/test_smoke.py::test_unknown_series_error_is_a_rate_erosion_error PASSED
+tests/test_waterfall.py::test_shipment_count_is_distinct_references PASSED
+tests/test_waterfall.py::test_base_codes_fold_into_base_category PASSED
+tests/test_waterfall.py::test_waterfall_steps_sum_to_realised PASSED
+tests/test_waterfall.py::test_surcharges_sorted_by_impact PASSED
+tests/test_waterfall.py::test_lane_missing_from_contract_is_an_error PASSED
+```
+<!-- END TESTS -->
+
+</details>
+
+## Licence
+
+MIT.
