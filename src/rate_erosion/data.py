@@ -114,8 +114,11 @@ def load_cost_lines(
     frame["currency"] = frame["currency"].fillna("USD").str.upper()
 
     if "fx_rate" not in frame.columns:
-        frame["fx_rate"] = 1.0
-    frame["fx_rate"] = pd.to_numeric(frame["fx_rate"], errors="coerce").fillna(1.0)
+        frame["fx_rate"] = float("nan")
+    frame["fx_rate"] = pd.to_numeric(frame["fx_rate"], errors="coerce")
+    # USD needs no conversion; other currencies stay missing until an fx_rate
+    # is supplied or benchmark.fill_fx looks one up from the Fed's daily rates
+    frame.loc[frame["fx_rate"].isna() & frame["currency"].eq("USD"), "fx_rate"] = 1.0
 
     ordered = [c for c in CANONICAL if c in frame.columns]
     return frame[ordered]

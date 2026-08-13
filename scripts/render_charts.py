@@ -10,7 +10,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from rate_erosion.benchmark import load_series
+from rate_erosion.benchmark import fill_fx, load_series
 from rate_erosion.data import load_contract, load_cost_lines, split_periods
 from rate_erosion.decompose import converted, waterfall
 
@@ -168,6 +168,7 @@ def chart_market(lines, market, mode):
 
 def main() -> int:
     lines = load_cost_lines(ROOT / "examples" / "demo.csv")
+    lines = fill_fx(lines, ROOT / "examples", offline_dir=ROOT / "examples")
     contract = load_contract(ROOT / "examples" / "contract.csv")
     market = load_series(ROOT / "examples" / "fred_PCU483111483111.csv")
     OUT.mkdir(parents=True, exist_ok=True)

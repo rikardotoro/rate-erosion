@@ -15,7 +15,7 @@ then answers the question that decides whether procurement did a good job:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/waterfall-dark.svg">
-  <img alt="Waterfall chart of per-shipment cost: a contracted base of 2,199 dollars builds up through base rate creep, bunker surcharge, terminal handling, peak season surcharge and documentation fees to a realised all-in cost of 3,183 dollars." src="docs/charts/waterfall-light.svg" width="760">
+  <img alt="Waterfall chart of per-shipment cost: a contracted base of 2,199 dollars builds up through base rate creep, bunker surcharge, terminal handling, peak season surcharge and documentation fees to a realised all-in cost of 3,186 dollars." src="docs/charts/waterfall-light.svg" width="760">
 </picture>
 
 ## The 30-second version
@@ -34,10 +34,10 @@ Per-shipment cost —
 │ Contracted base │        2,199 │
 │ Base rate creep │          +53 │
 │ BAF             │         +453 │
-│ THC             │         +233 │
+│ THC             │         +235 │
 │ PSS             │         +200 │
 │ DOC             │          +45 │
-│ Realised all-in │        3,183 │
+│ Realised all-in │        3,186 │
 └─────────────────┴──────────────┘
        Change       
  2021-01:2021-03 →  
@@ -46,17 +46,17 @@ Per-shipment cost —
 ┏━━━━━━━━┳━━━━━━━━━┓
 ┃ Effect ┃       $ ┃
 ┡━━━━━━━━╇━━━━━━━━━┩
-│ Volume │ +16,696 │
-│ Price  │ +59,531 │
-│ Mix    │ +19,136 │
-│ Fx     │  -2,944 │
-│ Total  │ +92,419 │
+│ Volume │ +16,803 │
+│ Price  │ +59,533 │
+│ Mix    │ +19,139 │
+│ Fx     │  -5,876 │
+│ Total  │ +89,600 │
 └────────┴─────────┘
 
-Realised cost per shipment moved +14.4% (183 shipments in 2021-01:2021-03, 189 
+Realised cost per shipment moved +13.8% (183 shipments in 2021-01:2021-03, 189 
 in 2022-04:2022-06).
 The market (PPI: Deep Sea Freight Transportation (BLS)) moved +50.2% over the 
-same window — you outperformed by 35.8% points.
+same window — you outperformed by 36.4% points.
 ```
 <!-- END OUTPUT -->
 
@@ -93,6 +93,10 @@ a rate increase, and more shipments on the expensive lane is not a carrier
 price rise. The tool revalues both periods at constant exchange rates and
 splits mix from price with the standard variance identity, so each effect
 lands in its own row — and the four rows sum to the total change exactly.
+You don't have to supply the exchange rates: when a line has a currency but
+no `fx_rate`, the tool looks up the Federal Reserve's actual daily rate for
+that date (15 major currencies, cached locally). In the demo, the FX row is
+the real 2021-22 euro slide showing up in euro-billed handling charges.
 
 ## Do this in your own tools
 
@@ -183,7 +187,7 @@ mapping with `--map canonical=your_column`):
 | `charge_code` | yes | BAS, BAF, THC, PSS… base codes fold into "base" |
 | `amount` | yes | Charge amount in its own currency |
 | `currency` | no | Defaults to USD |
-| `fx_rate` | no | Units of contract currency per unit of line currency |
+| `fx_rate` | no | USD per unit of line currency. Omit it and the tool fills it from the Fed's daily H.10 rates by line date; supply it only to override |
 
 **Contract CSV**: `lane`, `base_rate` (per shipment, contract currency).
 
@@ -199,6 +203,9 @@ machine-readable output.
   which surcharge ate your savings; arguing about it is your job.
 - **It needs a contracted rate per lane.** No contract file, no waterfall —
   the tool has nothing to compare against.
+- **Automatic FX assumes your contract currency is USD.** Billing in a
+  non-USD home currency works, but you must supply the `fx_rate` column
+  yourself — the Fed's rates are quoted against the dollar.
 - **The FRED benchmarks are US PPI-based proxies, not lane-level spot
   rates.** Professionals use SCFI, WCI or FBX for lane pricing; those are
   subscription products whose free tiers cover headline values only, so this
@@ -207,8 +214,9 @@ machine-readable output.
   effectively never published, so [`scripts/make_demo.py`](scripts/make_demo.py)
   generates a realistic erosion story with a fixed seed and
   [`examples/SOURCE.md`](examples/SOURCE.md) discloses it plainly. The market
-  benchmark in the demo is **real** — the actual BLS Deep Sea Freight PPI,
-  which really did rise 50% over the demo's 2021-22 contract term.
+  benchmark and the exchange rates in the demo are **real** — the actual BLS
+  Deep Sea Freight PPI, which really did rise 50% over the demo's 2021-22
+  contract term, and the Fed's actual daily EUR/USD rates.
 
 ## Is any of this actually tested?
 
@@ -223,7 +231,7 @@ pasted in. The suite runs in CI on every push, against Python 3.11 and 3.12.
 
 <!-- BEGIN TESTS -->
 ```
-44 passed
+50 passed
 
 tests/test_benchmark.py::test_default_series_is_registered PASSED
 tests/test_benchmark.py::test_resolve_accepts_a_known_id PASSED
@@ -254,6 +262,12 @@ tests/test_demo_data.py::test_demo_files_are_small PASSED
 tests/test_demo_data.py::test_demo_loads_and_spans_the_contract_term PASSED
 tests/test_demo_data.py::test_demo_is_reproducible PASSED
 tests/test_demo_data.py::test_offline_fred_slice_loads PASSED
+tests/test_fx.py::test_usd_lines_fill_with_one PASSED
+tests/test_fx.py::test_eur_fills_asof_the_line_date PASSED
+tests/test_fx.py::test_units_per_usd_series_is_inverted PASSED
+tests/test_fx.py::test_user_supplied_fx_is_never_touched PASSED
+tests/test_fx.py::test_unknown_currency_says_how_to_fix_it PASSED
+tests/test_fx.py::test_date_before_series_start_raises PASSED
 tests/test_periods.py::test_parse_period_is_month_inclusive PASSED
 tests/test_periods.py::test_parse_period_rejects_garbage PASSED
 tests/test_periods.py::test_explicit_periods_select_rows PASSED

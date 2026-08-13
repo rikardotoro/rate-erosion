@@ -5,7 +5,7 @@ from typing import Annotated
 import typer
 from rich.console import Console
 
-from rate_erosion.benchmark import SERIES, fetch_series, load_series, resolve_series
+from rate_erosion.benchmark import SERIES, fetch_series, fill_fx, load_series, resolve_series
 from rate_erosion.data import load_contract, load_cost_lines
 from rate_erosion.errors import RateErosionError
 from rate_erosion.report import analyse, render, to_dict
@@ -38,6 +38,8 @@ def main(
 
     try:
         lines = load_cost_lines(data, overrides or None)
+        if lines["fx_rate"].isna().any():
+            lines = fill_fx(lines, CACHE, offline_dir=EXAMPLES if demo else None)
         agreement = load_contract(contract)
 
         market = market_title = None

@@ -25,21 +25,22 @@ def main() -> int:
         mix_dear = 0.35 + t * 0.20                       # NLRTM share 35% → 55%
         baf = 380.0 + t * 80.0                           # bunker creep
         creep = 1.0 + t * 0.025                          # base over-billing 0 → 2.5%
-        eur_fx = 1.13 - t * 0.08                         # EUR weakens through 2022
 
         for i in range(rng.integers(55, 66)):
             lane = "CNSHA-NLRTM" if rng.random() < mix_dear else "CNSHA-USLAX"
             sid = f"{month}-{i:03d}"
             date = pd.Timestamp(month.start_time) + pd.Timedelta(days=int(rng.integers(0, 28)))
 
-            def line(code, amount, currency="USD", fx=1.0):
+            def line(code, amount, currency="USD"):
+                # fx_rate is deliberately absent: the tool fills it from the
+                # Fed's real daily rates (see benchmark.fill_fx)
                 rows.append({"shipment": sid, "date": date.date(), "lane": lane,
                              "charge_code": code, "amount": round(float(amount), 2),
-                             "currency": currency, "fx_rate": round(float(fx), 4)})
+                             "currency": currency})
 
             line("BAS", LANES[lane] * creep * rng.normal(1.0, 0.01))
             line("BAF", baf * rng.normal(1.0, 0.05))
-            line("THC", 220.0 * rng.normal(1.0, 0.03), currency="EUR", fx=eur_fx)
+            line("THC", 220.0 * rng.normal(1.0, 0.03), currency="EUR")
             line("DOC", 45.0)
             if str(month) in PSS_MONTHS:
                 line("PSS", 200.0)

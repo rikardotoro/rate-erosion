@@ -67,6 +67,79 @@ def fetch_series(series_id: str, cache_dir: Path) -> pd.Series:
     return load_series(cache)
 
 
+# currency -> (FRED series id, invert). The Fed's H.10 release quotes EUR, GBP,
+# AUD and NZD as USD per unit; every other currency as units per USD (invert).
+FX_SERIES: dict[str, tuple[str, bool]] = {
+    "EUR": ("DEXUSEU", False),
+    "GBP": ("DEXUSUK", False),
+    "AUD": ("DEXUSAL", False),
+    "NZD": ("DEXUSNZ", False),
+    "JPY": ("DEXJPUS", True),
+    "CNY": ("DEXCHUS", True),
+    "CAD": ("DEXCAUS", True),
+    "CHF": ("DEXSZUS", True),
+    "MXN": ("DEXMXUS", True),
+    "SEK": ("DEXSDUS", True),
+    "NOK": ("DEXNOUS", True),
+    "DKK": ("DEXDNUS", True),
+    "INR": ("DEXINUS", True),
+    "KRW": ("DEXKOUS", True),
+    "SGD": ("DEXSIUS", True),
+}
+
+
+def fx_series_for(currency: str) -> tuple[str, bool]:
+    try:
+        return FX_SERIES[currency.upper()]
+    except KeyError:
+        raise UnknownSeriesError(
+            f"no FRED exchange-rate series is registered for {currency!r}. "
+            "Supply an fx_rate column for those lines, or use one of: "
+            + ", ".join(sorted(FX_SERIES))
+        ) from None
+
+
+def fill_fx(
+    frame: pd.DataFrame, cache_dir: Path, offline_dir: Path | None = None
+) -> pd.DataFrame:
+    """Fill missing fx_rate values from the Fed's daily rates, by line date.
+
+    USD lines get 1.0; other currencies are looked up as-of the line date
+    (backward, so weekends and holidays take the last published rate).
+    Lines that already carry an fx_rate are never touched.
+    """
+    frame = frame.copy()
+    missing = frame["fx_rate"].isna()
+    frame.loc[missing & frame["currency"].eq("USD"), "fx_rate"] = 1.0
+
+    for currency in sorted(frame.loc[frame["fx_rate"].isna(), "currency"].unique()):
+        sid, invert = fx_series_for(currency)
+        offline = (offline_dir / f"fred_{sid}.csv") if offline_dir else None
+        if offline is not None and offline.exists():
+            series = load_series(offline)
+        else:
+            series = fetch_series(sid, cache_dir)
+        if invert:
+            series = 1.0 / series
+
+        rows = frame.index[frame["fx_rate"].isna() & frame["currency"].eq(currency)]
+        rates = pd.merge_asof(
+            frame.loc[rows, ["date"]].reset_index().sort_values("date"),
+            series.rename("fx").rename_axis("date").reset_index().sort_values("date"),
+            on="date", direction="backward",
+        ).set_index("index")["fx"]
+        frame.loc[rates.index, "fx_rate"] = rates
+
+    still = frame["fx_rate"].isna()
+    if still.any():
+        row = int(still.idxmax())
+        raise InsufficientDataError(
+            f"row {row}: no exchange rate available on or before "
+            f"{frame.loc[row, 'date'].date()} for {frame.loc[row, 'currency']}"
+        )
+    return frame
+
+
 def pct_change(series: pd.Series, start: pd.Timestamp, end: pd.Timestamp) -> float:
     picked = series.sort_index()
     first = picked.asof(start) if picked.index[0] <= start else picked.iloc[0]
