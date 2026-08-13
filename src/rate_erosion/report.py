@@ -69,7 +69,7 @@ def to_dict(analysis: Analysis) -> dict:
 def render(analysis: Analysis) -> None:
     console = Console()
 
-    table = Table(title=f"Per-shipment cost — {analysis.current}")
+    table = Table(title=f"Per shipment, {analysis.current}")
     table.add_column("Step")
     table.add_column("$ / shipment", justify="right")
     for label, value in analysis.waterfall:
@@ -78,7 +78,7 @@ def render(analysis: Analysis) -> None:
         table.add_row(label, text, style="bold" if anchor else None)
     console.print(table)
 
-    effects = Table(title=f"Change {analysis.baseline} → {analysis.current} (total spend)")
+    effects = Table(title="Total spend change")
     effects.add_column("Effect")
     effects.add_column("$", justify="right")
     for key in ("volume", "price", "mix", "fx"):

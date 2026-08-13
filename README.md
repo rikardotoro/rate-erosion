@@ -26,8 +26,7 @@ uvx --from git+https://github.com/rikardotoro/rate-erosion rate-erosion --demo
 
 <!-- BEGIN OUTPUT -->
 ```
-Per-shipment cost —        
-         2022-04:2022-06          
+Per shipment, 2022-04:2022-06   
 ┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
 ┃ Step            ┃ $ / shipment ┃
 ┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
@@ -39,10 +38,7 @@ Per-shipment cost —
 │ DOC             │          +45 │
 │ Realised all-in │        3,186 │
 └─────────────────┴──────────────┘
-       Change       
- 2021-01:2021-03 →  
-  2022-04:2022-06   
-   (total spend)    
+ Total spend change 
 ┏━━━━━━━━┳━━━━━━━━━┓
 ┃ Effect ┃       $ ┃
 ┡━━━━━━━━╇━━━━━━━━━┩
