@@ -10,7 +10,7 @@ from rate_erosion.errors import InsufficientDataError, UnknownSeriesError
 SERIES: dict[str, str] = {
     "PCU483111483111": "PPI: Deep Sea Freight Transportation (BLS)",
     "PCU4883204883208": "PPI: Marine Cargo Handling — Containers (BLS)",
-    "FRGSHPUSM649NCIS": "Cass Freight Index: Shipments",
+    "FRGEXPUSM649NCIS": "Cass Freight Index: Expenditures",
 }
 
 DEFAULT_SERIES = "PCU483111483111"

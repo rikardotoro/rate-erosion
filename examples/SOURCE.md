@@ -16,6 +16,6 @@
   data, public domain. The demo's euro-denominated handling charges are
   converted with these actual rates — the 2021-22 euro slide in the demo's
   FX effect really happened. Retrieved 2026-08-12 by the same script.
-- The Cass Freight Index (`FRGSHPUSM649NCIS`) is proprietary to Cass
+- The Cass Freight Index (`FRGEXPUSM649NCIS`) is proprietary to Cass
   Information Systems: the tool can fetch it live, but it is never
   committed to this repository.
