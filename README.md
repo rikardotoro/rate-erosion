@@ -4,17 +4,11 @@
 
 **You negotiated −8%. You paid +3%. Here is where it went.**
 
-You negotiate a rate reduction with your carrier, and a year later the invoices
-say you are paying more than before. This happens constantly, and it is rarely
-one big thing. The base rate gets billed a little high. The fuel surcharge
-creeps. A "peak season surcharge" appears for a few months. A charge billed in
-euros moves with the exchange rate. And your own shipments drift toward the
-more expensive route. Each piece is small; together they eat the discount.
-
-This tool reads your cost lines — one row per charge on each shipment — and
-splits the gap between the rate you signed and the money you actually paid,
-piece by piece. Then it answers the question that decides whether the
-negotiation was actually good: **how did you do compared to the market?**
+Negotiated discounts erode. The base gets billed a little high, surcharges
+creep, a peak-season charge appears, exchange rates move, and your own traffic
+drifts to the dearer route. This tool reads your cost lines, splits the gap
+piece by piece, and then asks the question that actually judges the deal:
+how did you do against the market?
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/waterfall-dark.svg">
@@ -70,137 +64,76 @@ was relabelled between charge codes, not saved.
 ```
 <!-- END OUTPUT -->
 
-Three answers in one screen. The first table shows **where** the money went:
-from the rate you negotiated at the top to what you actually paid at the
-bottom, with every surcharge spelled out in between. The second shows **why**
-your total spend changed, split into four reasons that add up exactly. The
-last lines tell you **whether to be upset about it** — and in the demo, the
-answer is no: costs rose 13%, but the market rose 50%.
+Where the money went, why total spend changed (four reasons that sum exactly
+— no leftover), and whether the market excuses it.
 
-## Two mistakes most cost reviews make
+## Against the market
 
-**Mistake 1: treating the gap as one number.** "We are paying 14% more per
-shipment" doesn't tell anyone what to do. Is the carrier over-billing the
-base rate? Is it fuel? Is it your own traffic moving to the expensive route?
-Each of those has a different owner and a different fix, so the tool keeps
-them apart.
-
-**Mistake 2: comparing your costs to nothing.** In the demo, cost per
-shipment rises 13% over the contract. On its own that looks like a failure.
-But over the same 18 months the market price of ocean freight rose 50% — so
-whoever locked that contract saved the company a fortune, and a report that
-only shows "+13%" punishes them for it. The comparison uses a free public
-index (the US producer price index for deep sea freight, from FRED), so
-there is nothing to subscribe to.
+In the demo, cost per shipment rises 13% — which looks bad until you see the
+market rose 50% over the same 18 months. Whoever locked that contract saved a
+fortune, and a report showing only "+13%" punishes them for it.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/market-dark.svg">
   <img alt="Line chart indexing your per-shipment cost against the Deep Sea Freight producer price index, both starting at 100 in January 2021. Your cost ends at 114 while the market ends at 150 — the gap is your outperformance." src="docs/charts/market-light.svg" width="760">
 </picture>
 
-There is a quieter third mistake: letting currency and route changes pollute
-the numbers. A charge billed in euros that didn't change *in euros* is not a
-price increase — the exchange rate moved, not the carrier. And more shipments
-on an expensive route is not a rate rise either. The tool separates both out,
-so the "price" line only ever contains actual price changes. You don't even
-need to supply exchange rates: it looks up the Federal Reserve's real daily
-rate for each line's date (15 major currencies, cached locally).
+The price line stays clean: currency moves and route shifts are separated out
+(exchange rates come from the Fed's daily data automatically), so "price"
+only ever means the carrier actually charged more.
 
-## What "the market" actually is here
+## What "the market" is
 
-Fair question, because it is not the index most people would name first.
-
-The default benchmark is the **Producer Price Index for Deep Sea Freight
-Transportation**, published by the US Bureau of Labor Statistics and served
-through FRED. Every month the BLS asks ocean freight carriers what prices
-they are actually charging for their services, and the index tracks how that
-average moves. So "the market rose 50%" means: over the same window, carriers'
-selling prices — as measured by a government statistical survey that has run
-since 1988 — rose 50%. That is exactly the yardstick the verdict needs:
-did carrier pricing broadly rise or fall while your contract ran, and by
-roughly how much.
-
-Thirty-eight years of that survey look like this — and the demo contract
-happens to sit on the wildest stretch in its entire history:
+The default benchmark is the **Producer Price Index for Deep Sea Freight** —
+the US Bureau of Labor Statistics asks ocean carriers every month what they
+charge, and has since 1988. Free, public domain, checkable by anyone.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/history-dark.svg">
   <img alt="Line chart of the Deep Sea Freight producer price index from 1988 to 2026. The index moves gradually for three decades, then surges steeply through 2021 and 2022. A shaded band marks the demo contract window, sitting exactly on the surge." src="docs/charts/history-light.svg" width="760">
 </picture>
 
-Why not the alternatives you may have heard of:
-
-- **The Baltic Dry Index** is the famous one, and it is the wrong one. It
-  tracks the cost of chartering ships that carry bulk goods — iron ore,
-  grain, coal — not containers. Ask this tool for it and it will refuse and
-  tell you why.
-- **SCFI, WCI and FBX** are the indices freight professionals quote for
-  container lane rates, and they are subscription products. The free versions
-  give you today's headline, not the history, and their licences don't allow
-  redistribution. This tool only uses data anyone can pull for free, so its
-  results can be checked by anyone.
-
-The PPI has honest limitations. It is US-centric, it averages all lanes and
-carriers, it blends contract and spot business, and it is an index rather
-than a dollars-per-container rate. That makes it useless for pricing a
-specific lane — and perfectly adequate for judging the *direction and rough
-size* of the market move behind your contract, which is all the verdict
-claims.
-
-One more reason the tool makes you choose the benchmark explicitly: even the
-free government surveys are different markets. Over the demo's term, ocean
-freight prices rose 50% while port container-handling fees rose 2%. Your
-+13% is a great outcome against the first and a poor one against the second
-— so the choice of yardstick is not a technicality, it is the analysis:
+Even free surveys are different markets — over the demo term ocean freight
+rose 50% while port handling rose 2%. The choice of yardstick *is* the
+analysis:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/benchmarks-dark.svg">
   <img alt="Line chart indexing three series to 100 over the demo term: the ocean freight index ends at 150, your cost ends at 114, and the port handling index ends at 102. The same cost change looks completely different depending on which benchmark sits next to it." src="docs/charts/benchmarks-light.svg" width="760">
 </picture>
 
-Alternates ship in the registry (`--benchmark` accepts them): the container
-handling PPI shown above, and the Cass Freight Index expenditures series,
-which tracks total freight spend.
+The Baltic Dry Index is refused by name — it tracks bulk cargo, not
+containers. SCFI, WCI and FBX are the right concept but paywalled, so results
+built on them couldn't be checked by readers.
 
 ## The patterns underneath
 
-Two things you can't see in a summary table, so the tool checks the full
-month-by-month history for them:
+**When did the rate move?** Changepoints turn "costs went up" into dates and
+sizes — in the demo, three steps that are the peak-season surcharge switching
+on and off.
 
-**When did the rate actually move?** Instead of "costs went up", you get
-dates and sizes. In the demo: up 9.8% in August 2021, back down 6% in
-November, up 8% again in April 2022 — which is a peak-season surcharge
-switching on and off, found from the numbers alone.
-
-**Is money being relabelled?** A common way around a negotiated price cap:
-lower one charge and introduce a new one for the same amount. The total stays
-flat, the cap is technically respected, and a report that tracks only totals
-sees nothing. The tool looks for pairs of charges that mirror each other
-month after month. In the demo, a "new" low-sulphur surcharge appears in
-October 2021 for exactly what the fuel surcharge gave up:
+**Is money being relabelled?** The classic way around a price cap: lower one
+charge, add a new one for the same amount. The total stays flat; a
+totals-only report sees nothing. In the demo a "new" low-sulphur surcharge
+appears in October 2021 for exactly what the fuel surcharge gave up, and the
+tool says so: *money was relabelled, not saved.*
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/relabel-dark.svg">
   <img alt="Line chart of monthly fuel-related charges per shipment. The fuel surcharge line drops sharply in October 2021 exactly when a new low-sulphur surcharge line appears, while the dashed line of their sum continues smoothly as if nothing happened." src="docs/charts/relabel-light.svg" width="760">
 </picture>
 
-When that happens, the tool says so in plain words: *money was relabelled
-between charge codes, not saved.*
-
 ## Do this in your own tools
 
-You don't need this tool to stop reporting one blended number. The basic
-pieces are one formula away in whatever you already use:
-
-**Excel** — a pivot of amount by charge code, per quarter, is already the
-waterfall. Per-shipment cost of one charge type:
+**Excel** — per-shipment cost of one charge type; a pivot per quarter is
+already the waterfall:
 
 ```
 =SUMIFS(amount, charge_code, "BAF") / SUMPRODUCT(1/COUNTIF(shipments, shipments))
 ```
 
-**Power BI (DAX)** — the price effect for each lane, which is the heart of a
-price/volume/mix split:
+**Power BI (DAX)** — the price effect per lane; mix and volume follow the
+same pattern with the references swapped:
 
 ```
 Price Effect :=
@@ -210,11 +143,7 @@ SUMX(
 )
 ```
 
-Mix and volume follow the same pattern with the reference values swapped.
-This is a standard business-intelligence technique — the point is that
-freight reporting almost never uses it.
-
-**SQL** — cost per shipment by charge type for one period:
+**SQL** — run for both periods and subtract:
 
 ```sql
 SELECT charge_code,
@@ -225,38 +154,21 @@ GROUP BY charge_code
 ORDER BY per_shipment DESC;
 ```
 
-Run it for both periods and subtract.
-
-What none of these do: keep exchange rates and route changes out of the price
-line, benchmark you against the market, or catch the relabelling trick. Those
-are the parts the tool adds.
+What none of these do: keep FX and route mix out of the price line, benchmark
+against the market, or catch the relabelling trick.
 
 ## Five ways to get this wrong
 
-These are real mistakes from real cost reviews. Each one has a test in this
-repo that reproduces the failure:
-
-1. **Reaching for the Baltic Dry Index because it's the famous one.** It
-   tracks bulk goods — iron ore, grain, coal — not containers. The tool
-   refuses it by name and explains why.
+1. **Using the Baltic Dry Index** — bulk cargo, not containers.
    → [`tests/test_benchmark.py::test_baltic_dry_index_is_refused_with_explanation`](tests/test_benchmark.py)
-
-2. **Calling a route change a price change.** If per-lane prices are flat and
-   your volume moved to the dear lane, the price effect must be exactly zero.
+2. **Calling a route change a price change.**
    → [`tests/test_decompose.py::test_mix_shift_is_not_booked_as_price`](tests/test_decompose.py)
-
-3. **Calling a currency move a price change.** A charge that didn't move in
-   its own currency is not a carrier increase.
+3. **Calling a currency move a price change.**
    → [`tests/test_decompose.py::test_fx_movement_is_not_a_rate_change`](tests/test_decompose.py)
-
-4. **Comparing your rate change to nothing.** +13% is a disaster in a flat
-   market and a triumph in 2021-22. Without the market next to it, the number
-   means nothing.
+4. **Comparing your rate change to nothing** — +13% means nothing without the
+   market next to it.
    → [`tests/test_benchmark.py::test_verdict_reports_relative_points`](tests/test_benchmark.py)
-
-5. **Trusting a flat total.** Charges can be relabelled underneath it — one
-   down, a new one up by the same amount. That is how a price cap gets
-   managed instead of honoured.
+5. **Trusting a flat total** — charges can be relabelled underneath it.
    → [`tests/test_patterns.py::test_planted_shuffle_is_detected`](tests/test_patterns.py)
 
 ## Run it
@@ -268,51 +180,39 @@ uvx --from git+https://github.com/rikardotoro/rate-erosion rate-erosion \
   --baseline 2025-01:2025-03 --current 2026-04:2026-06
 ```
 
-**Cost lines CSV** — one row per charge on each shipment. Column names are
-auto-detected from common aliases; force any of them with
-`--map canonical=your_column`:
+**Cost lines CSV** — one row per charge per shipment; names auto-detected,
+forceable with `--map canonical=your_column`:
 
 | Column | Required | Meaning |
 |---|---|---|
-| `shipment` | yes | Shipment / bill-of-lading / container reference |
+| `shipment` | yes | Shipment / BL / container reference |
 | `date` | yes | Charge or invoice date |
-| `lane` | yes | The route the shipment moved on |
-| `charge_code` | yes | BAS, BAF, THC… base-rate codes are grouped as "base" |
-| `amount` | yes | Charge amount, in its own currency |
+| `lane` | yes | Route |
+| `charge_code` | yes | BAS, BAF, THC… base codes group as "base" |
+| `amount` | yes | Amount in its own currency |
 | `currency` | no | Defaults to USD |
-| `fx_rate` | no | Leave it out — the tool fills it from the Fed's daily rates |
+| `fx_rate` | no | Leave out — filled from the Fed's daily rates |
 
-**Contract CSV** — what you negotiated: `lane`, `base_rate` (per shipment).
+**Contract CSV** — `lane`, `base_rate` (per shipment).
 
-Options: `--baseline` and `--current` pick the two periods to compare
-(default: first vs last three months of your data). `--benchmark` picks the
-market index — the deep-sea producer price index by default, `none` to skip.
-`--json` for machine-readable output.
+`--baseline` / `--current` pick the periods (default: first vs last three
+months). `--benchmark` picks the index (`none` to skip). `--json` for
+machines.
 
 ## What this doesn't do
 
-- **It won't tell you whether a surcharge was legitimate.** It tells you
-  which one ate your savings; the conversation with the carrier is your job.
-- **It needs your contracted rate per lane.** Without the contract file there
-  is nothing to compare against.
-- **The market index is a broad US proxy, not your lane's spot rate.** The
-  indices professionals quote for lane pricing (SCFI, WCI, FBX) are
-  subscription products, so this tool uses genuinely free government data
-  and says so.
-- **The demo cost lines are synthetic.** Real invoice data is never published
-  openly, so [`scripts/make_demo.py`](scripts/make_demo.py) generates a
-  realistic story with a fixed seed and
-  [`examples/SOURCE.md`](examples/SOURCE.md) discloses it. The market data in
-  the demo is real — the actual index, which really did rise 50% over the
-  demo's 2021-22 term — and so are the exchange rates.
+- Judge whether a surcharge was legitimate — that conversation is yours.
+- Work without your contracted rate per lane.
+- Price a specific lane: the index is a broad US proxy, and says so.
+- Use real invoices in the demo: the cost lines are synthetic (seeded,
+  disclosed in [`examples/SOURCE.md`](examples/SOURCE.md)); the index and
+  exchange rates are real.
 
 ## Is any of this actually tested?
 
-Yes. The exactness claim — four effects that sum to the total with nothing
-left over — is itself a test. So is the planted relabelling in the demo:
-if the detector stopped catching it, CI would fail. Every trap above names
-its test, the demo output is produced by running the tool, and the suite
-runs on every push against Python 3.11 and 3.12.
+Yes — including the claims: the four effects summing exactly is a test, and
+so is the planted relabelling. The demo output above is produced by running
+the tool. CI runs on 3.11 and 3.12.
 
 <details>
 <summary><strong>The full test list</strong> — regenerated by <code>scripts/render_readme_output.py</code>, so it can't drift</summary>
