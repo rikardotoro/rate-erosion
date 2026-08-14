@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from rate_erosion.benchmark import fill_fx, load_series
 from rate_erosion.data import load_contract, load_cost_lines, split_periods
 from rate_erosion.decompose import converted, waterfall
+from rate_erosion.patterns import monthly_matrix
 
 ROOT = Path(__file__).parent.parent
 OUT = ROOT / "docs" / "charts"
@@ -166,6 +167,54 @@ def chart_market(lines, market, mode):
     return _svg(W, H, body)
 
 
+# ---------------------------------------------------------------- chart 3
+def chart_relabel(lines, mode):
+    t = TOKENS[mode]
+    matrix = monthly_matrix(lines)
+    baf, lss = matrix["BAF"], matrix.get("LSS", matrix["BAF"] * 0.0)
+    together = baf + lss
+    span = [p.to_timestamp() for p in matrix.index]
+
+    W, H = 760, 300
+    left, right, top, bottom = 52, 130, 74, 40
+    x0, x1, y0, y1 = left, W - right, H - bottom, top + 6
+    hi = float(together.max()) * 1.15
+
+    def X(ts):
+        return x0 + (ts - span[0]) / (span[-1] - span[0]) * (x1 - x0)
+
+    def Y(v):
+        return y0 - v / hi * (y0 - y1)
+
+    body = [_text(20, 26, "Money moved codes, not size", 16, t["ink"], weight="600"),
+            _text(20, 44, "Monthly bunker charge per shipment in the demo. In October a new code appears; the sum does not care.",
+                  12, t["ink2"])]
+
+    for v in range(0, int(hi) + 1, 100):
+        body.append(_line(x0, Y(v), x1, Y(v), t["grid"]))
+        body.append(_text(x0 - 8, Y(v) + 4, f"{v}", 11, t["muted"], anchor="end", tabular=True))
+
+    def path(series, color, dash=None):
+        d = " L ".join(f"{X(ts):.1f} {Y(float(v)):.1f}" for ts, v in zip(span, series))
+        extra = f' stroke-dasharray="{dash}"' if dash else ""
+        return (f'<path d="M {d}" fill="none" stroke="{color}" stroke-width="2" '
+                f'stroke-linejoin="round"{extra}/>')
+
+    body.append(path(together, t["ink2"], dash="5 4"))
+    body.append(path(baf, t["anchor"]))
+    body.append(path(lss, t["erosion"]))
+
+    body.append(_text(x1 + 10, Y(float(together.iloc[-1])) + 4, "BAF + LSS", 12, t["ink2"], weight="600"))
+    body.append(_text(x1 + 10, Y(float(baf.iloc[-1])) + 4, "BAF", 12, t["anchor"], weight="600"))
+    body.append(_text(x1 + 10, Y(float(lss.iloc[-1])) + 4, "LSS", 12, t["erosion"], weight="600"))
+
+    for ts in span[::3]:
+        body.append(_text(X(ts), y0 + 18, ts.strftime("%b %y"), 11, t["muted"],
+                          anchor="middle", tabular=True))
+    body.append(_line(x0, y0, x1, y0, t["axis"], 1.2))
+    return _svg(W, H, body)
+
+
 def main() -> int:
     lines = load_cost_lines(ROOT / "examples" / "demo.csv")
     lines = fill_fx(lines, ROOT / "examples", offline_dir=ROOT / "examples")
@@ -175,6 +224,7 @@ def main() -> int:
     for mode in ("light", "dark"):
         (OUT / f"waterfall-{mode}.svg").write_text(chart_waterfall(lines, contract, mode))
         (OUT / f"market-{mode}.svg").write_text(chart_market(lines, market, mode))
+        (OUT / f"relabel-{mode}.svg").write_text(chart_relabel(lines, mode))
         print(f"wrote {mode} charts")
     return 0
 

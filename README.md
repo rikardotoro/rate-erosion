@@ -15,7 +15,7 @@ then answers the question that decides whether procurement did a good job:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/waterfall-dark.svg">
-  <img alt="Waterfall chart of per-shipment cost: a contracted base of 2,199 dollars builds up through base rate creep, bunker surcharge, terminal handling, peak season surcharge and documentation fees to a realised all-in cost of 3,186 dollars." src="docs/charts/waterfall-light.svg" width="760">
+  <img alt="Waterfall chart of per-shipment cost: a contracted base of 2,199 dollars builds up through base rate creep, bunker surcharge, terminal handling, peak season surcharge and documentation fees to a realised all-in cost of 3,175 dollars." src="docs/charts/waterfall-light.svg" width="760">
 </picture>
 
 ## The 30-second version
@@ -30,29 +30,35 @@ Per shipment, 2022-04:2022-06
 ┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
 ┃ Step            ┃ $ / shipment ┃
 ┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
-│ Contracted base │        2,199 │
-│ Base rate creep │          +53 │
-│ BAF             │         +453 │
+│ Contracted base │        2,189 │
+│ Base rate creep │          +50 │
+│ BAF             │         +326 │
 │ THC             │         +235 │
 │ PSS             │         +200 │
+│ LSS             │         +130 │
 │ DOC             │          +45 │
-│ Realised all-in │        3,186 │
+│ Realised all-in │        3,175 │
 └─────────────────┴──────────────┘
  Total spend change 
 ┏━━━━━━━━┳━━━━━━━━━┓
 ┃ Effect ┃       $ ┃
 ┡━━━━━━━━╇━━━━━━━━━┩
-│ Volume │ +16,803 │
-│ Price  │ +59,533 │
-│ Mix    │ +19,139 │
-│ Fx     │  -5,876 │
-│ Total  │ +89,600 │
+│ Volume │ -14,003 │
+│ Price  │ +55,948 │
+│ Mix    │ +16,258 │
+│ Fx     │  -5,504 │
+│ Total  │ +52,700 │
 └────────┴─────────┘
 
-Realised cost per shipment moved +13.8% (183 shipments in 2021-01:2021-03, 189 
+Realised cost per shipment moved +13.4% (183 shipments in 2021-01:2021-03, 178 
 in 2022-04:2022-06).
 The market (PPI: Deep Sea Freight Transportation (BLS)) moved +50.2% over the 
-same window — you outperformed by 36.4% points.
+same window — you outperformed by 36.8% points.
+All-in per shipment stepped +9.8% in 2021-08 (2,851 → 3,131).
+All-in per shipment stepped -6.0% in 2021-11 (3,131 → 2,942).
+All-in per shipment stepped +8.0% in 2022-04 (2,942 → 3,176).
+Component shuffle: BAF and LSS move in opposition (correlation -1.00) while 
+their sum barely moves. Money is being relabelled, not saved.
 ```
 <!-- END OUTPUT -->
 
@@ -69,7 +75,7 @@ Two separate mistakes hide in most freight cost reviews:
    not actionable. *Which part* is the carrier over-billing the base, which
    part is bunker, which part is your own lane mix shifting? Each has a
    different owner and a different fix. The waterfall above splits the demo's
-   gap into five named pieces.
+   gap into six named pieces.
 
 2. **The change is compared to nothing.** In the demo, realised cost per
    shipment rises 14% over the contract term — sounds like a procurement
@@ -93,6 +99,35 @@ You don't have to supply the exchange rates: when a line has a currency but
 no `fx_rate`, the tool looks up the Federal Reserve's actual daily rate for
 that date (15 major currencies, cached locally). In the demo, the FX row is
 the real 2021-22 euro slide showing up in euro-billed handling charges.
+
+## The patterns underneath
+
+Two more questions the tables above cannot answer, so the tool checks for
+them on the full history:
+
+**When did the rate actually move?** The monthly all-in is segmented into
+regimes with a changepoint detector, so instead of "costs went up" you get
+dates and magnitudes: in the demo, +9.8% in August 2021, back down −6.0% in
+November, up again +8.0% in April 2022 — which is the peak-season surcharge
+switching on and off, caught from the numbers alone.
+
+**Is money being relabelled?** The classic way around a rate cap is to lower
+one charge and introduce another for the same amount. The all-in stays flat,
+the cap is technically honoured, and a report that only tracks totals sees
+nothing. The signature is mechanical: two components whose month-over-month
+moves cancel each other. In the demo, a new LSS code appears in October 2021
+for exactly what BAF gave up, and the tool calls it out:
+
+> Component shuffle: BAF and LSS move in opposition (correlation −1.00) while
+> their sum barely moves. Money is being relabelled, not saved.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/relabel-dark.svg">
+  <img alt="Line chart of monthly bunker-related charges per shipment. The BAF line drops sharply in October 2021 exactly when a new LSS line appears, while the dashed line of their sum continues smoothly upward as if nothing happened." src="docs/charts/relabel-light.svg" width="760">
+</picture>
+
+Neither check fits in a spreadsheet formula, which is why they are in the
+tool rather than in the recipes below.
 
 ## Do this in your own tools
 
@@ -140,7 +175,7 @@ None of these stop FX or lane mix from polluting the price line, and none of
 them benchmark you against the market — isolating the effects exactly and
 attaching the FRED verdict is what the tool adds.
 
-## Four ways to get this wrong
+## Five ways to get this wrong
 
 Each is a real mistake from real cost reviews, and each has a test proving
 the failure mode:
@@ -162,6 +197,12 @@ the failure mode:
    market and a triumph in 2021-22. The verdict is relative or it is
    meaningless.
    → [`tests/test_benchmark.py::test_verdict_reports_relative_points`](tests/test_benchmark.py)
+
+5. **Trusting a flat all-in.** Components can be relabelled underneath it —
+   one charge down, a new one up by the same amount — which is how a rate cap
+   gets managed instead of honoured. The tool tests components for offsetting
+   movement.
+   → [`tests/test_patterns.py::test_planted_shuffle_is_detected`](tests/test_patterns.py)
 
 ## Run it
 
@@ -227,7 +268,7 @@ pasted in. The suite runs in CI on every push, against Python 3.11 and 3.12.
 
 <!-- BEGIN TESTS -->
 ```
-50 passed
+60 passed
 
 tests/test_benchmark.py::test_default_series_is_registered PASSED
 tests/test_benchmark.py::test_resolve_accepts_a_known_id PASSED
@@ -258,12 +299,22 @@ tests/test_demo_data.py::test_demo_files_are_small PASSED
 tests/test_demo_data.py::test_demo_loads_and_spans_the_contract_term PASSED
 tests/test_demo_data.py::test_demo_is_reproducible PASSED
 tests/test_demo_data.py::test_offline_fred_slice_loads PASSED
+tests/test_demo_data.py::test_demo_shuffle_is_detected PASSED
 tests/test_fx.py::test_usd_lines_fill_with_one PASSED
 tests/test_fx.py::test_eur_fills_asof_the_line_date PASSED
 tests/test_fx.py::test_units_per_usd_series_is_inverted PASSED
 tests/test_fx.py::test_user_supplied_fx_is_never_touched PASSED
 tests/test_fx.py::test_unknown_currency_says_how_to_fix_it PASSED
 tests/test_fx.py::test_date_before_series_start_raises PASSED
+tests/test_patterns.py::test_monthly_matrix_is_per_shipment PASSED
+tests/test_patterns.py::test_planted_shuffle_is_detected PASSED
+tests/test_patterns.py::test_independent_movement_is_not_a_shuffle PASSED
+tests/test_patterns.py::test_joint_increases_are_not_a_shuffle PASSED
+tests/test_patterns.py::test_too_few_months_returns_none PASSED
+tests/test_patterns.py::test_changepoints_find_a_single_step PASSED
+tests/test_patterns.py::test_changepoints_ignore_pure_noise PASSED
+tests/test_patterns.py::test_changepoints_find_two_steps PASSED
+tests/test_patterns.py::test_rate_regimes_report_step_direction PASSED
 tests/test_periods.py::test_parse_period_is_month_inclusive PASSED
 tests/test_periods.py::test_parse_period_rejects_garbage PASSED
 tests/test_periods.py::test_explicit_periods_select_rows PASSED
