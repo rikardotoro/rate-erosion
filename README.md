@@ -106,6 +106,41 @@ so the "price" line only ever contains actual price changes. You don't even
 need to supply exchange rates: it looks up the Federal Reserve's real daily
 rate for each line's date (15 major currencies, cached locally).
 
+## What "the market" actually is here
+
+Fair question, because it is not the index most people would name first.
+
+The default benchmark is the **Producer Price Index for Deep Sea Freight
+Transportation**, published by the US Bureau of Labor Statistics and served
+through FRED. Every month the BLS asks ocean freight carriers what prices
+they are actually charging for their services, and the index tracks how that
+average moves. So "the market rose 50%" means: over the same window, carriers'
+selling prices — as measured by a government statistical survey that has run
+since 1988 — rose 50%. That is exactly the yardstick the verdict needs:
+did carrier pricing broadly rise or fall while your contract ran, and by
+roughly how much.
+
+Why not the alternatives you may have heard of:
+
+- **The Baltic Dry Index** is the famous one, and it is the wrong one. It
+  tracks the cost of chartering ships that carry bulk goods — iron ore,
+  grain, coal — not containers. Ask this tool for it and it will refuse and
+  tell you why.
+- **SCFI, WCI and FBX** are the indices freight professionals quote for
+  container lane rates, and they are subscription products. The free versions
+  give you today's headline, not the history, and their licences don't allow
+  redistribution. This tool only uses data anyone can pull for free, so its
+  results can be checked by anyone.
+
+The PPI has honest limitations. It is US-centric, it averages all lanes and
+carriers, it blends contract and spot business, and it is an index rather
+than a dollars-per-container rate. That makes it useless for pricing a
+specific lane — and perfectly adequate for judging the *direction and rough
+size* of the market move behind your contract, which is all the verdict
+claims. Two alternates ship in the registry (`--benchmark` accepts them): the
+PPI for marine container handling, and the Cass Freight Index expenditures
+series, which tracks total freight spend.
+
 ## The patterns underneath
 
 Two things you can't see in a summary table, so the tool checks the full
