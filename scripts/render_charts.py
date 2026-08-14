@@ -215,16 +215,122 @@ def chart_relabel(lines, mode):
     return _svg(W, H, body)
 
 
+# ---------------------------------------------------------------- chart 4
+def chart_history(market, mode):
+    """38 years of the deep-sea PPI, with the demo contract window shaded."""
+    t = TOKENS[mode]
+    series = market.sort_index()
+    w_start, w_end = pd.Timestamp("2021-01-01"), pd.Timestamp("2022-06-30")
+
+    W, H = 760, 300
+    left, right, top, bottom = 52, 26, 74, 40
+    x0, x1, y0, y1 = left, W - right, H - bottom, top + 6
+    lo, hi = 0.0, float(series.max()) * 1.08
+
+    def X(ts):
+        return x0 + (ts - series.index[0]) / (series.index[-1] - series.index[0]) * (x1 - x0)
+
+    def Y(v):
+        return y0 - (v - lo) / (hi - lo) * (y0 - y1)
+
+    body = [_text(20, 26, "The survey has seen everything", 16, t["ink"], weight="600"),
+            _text(20, 44, "The Deep Sea Freight producer price index, monthly since 1988. The shaded band is the demo contract.",
+                  12, t["ink2"])]
+
+    for v in range(0, int(hi) + 1, 100):
+        body.append(_line(x0, Y(v), x1, Y(v), t["grid"]))
+        body.append(_text(x0 - 8, Y(v) + 4, f"{v}", 11, t["muted"], anchor="end", tabular=True))
+
+    body.append(f'<rect x="{X(w_start):.1f}" y="{y1:.1f}" width="{X(w_end) - X(w_start):.1f}" '
+                f'height="{y0 - y1:.1f}" fill="{t["erosion"]}" fill-opacity="0.15"/>')
+    body.append(_text((X(w_start) + X(w_end)) / 2, y1 + 14, "the demo", 11,
+                      t["erosion"], anchor="middle", weight="600"))
+
+    d = " L ".join(f"{X(ts):.1f} {Y(float(v)):.1f}" for ts, v in series.items())
+    body.append(f'<path d="M {d}" fill="none" stroke="{t["anchor"]}" stroke-width="2" '
+                f'stroke-linejoin="round"/>')
+
+    for year in range(1990, 2027, 5):
+        ts = pd.Timestamp(f"{year}-01-01")
+        body.append(_text(X(ts), y0 + 18, str(year), 11, t["muted"], anchor="middle", tabular=True))
+    body.append(_line(x0, y0, x1, y0, t["axis"], 1.2))
+    return _svg(W, H, body)
+
+
+# ---------------------------------------------------------------- chart 5
+def chart_benchmarks(lines, deep_sea, handling, mode):
+    """Two free surveys, two very different markets — plus you, over the term."""
+    t = TOKENS[mode]
+    aqua = "#1baf7a" if mode == "light" else "#199e70"
+
+    month = lines["date"].dt.to_period("M")
+    monthly = converted(lines).groupby(month).sum() / lines.groupby(month)["shipment"].nunique()
+    yours = monthly / monthly.iloc[0] * 100.0
+    span = [p.to_timestamp() for p in yours.index]
+
+    def indexed(series):
+        picked = series.sort_index()
+        picked = picked[(picked.index >= span[0]) & (picked.index <= span[-1] + pd.offsets.MonthEnd(0))]
+        return picked / picked.iloc[0] * 100.0
+
+    sea, port = indexed(deep_sea), indexed(handling)
+
+    W, H = 760, 340
+    left, right, top, bottom = 52, 200, 74, 40
+    x0, x1, y0, y1 = left, W - right, H - bottom, top + 6
+    lo = min(yours.min(), sea.min(), port.min()) - 4
+    hi = max(yours.max(), sea.max(), port.max()) + 6
+
+    def X(ts):
+        return x0 + (ts - span[0]) / (span[-1] - span[0]) * (x1 - x0)
+
+    def Y(v):
+        return y0 - (v - lo) / (hi - lo) * (y0 - y1)
+
+    body = [_text(20, 26, "Pick the market you actually buy", 16, t["ink"], weight="600"),
+            _text(20, 44, "Both are free government surveys, indexed to 100. They are not the same market.",
+                  12, t["ink2"])]
+
+    for v in range(int(lo // 10 * 10) + 10, int(hi) + 1, 10):
+        body.append(_line(x0, Y(v), x1, Y(v), t["grid"]))
+        body.append(_text(x0 - 8, Y(v) + 4, f"{v}", 11, t["muted"], anchor="end", tabular=True))
+
+    def path(points, color):
+        d = " L ".join(f"{x:.1f} {y:.1f}" for x, y in points)
+        return (f'<path d="M {d}" fill="none" stroke="{color}" stroke-width="2" '
+                f'stroke-linejoin="round"/>')
+
+    body.append(path([(X(ts), Y(v)) for ts, v in sea.items()], t["anchor"]))
+    body.append(path([(X(ts), Y(v)) for ts, v in port.items()], aqua))
+    body.append(path([(X(ts), Y(v)) for ts, v in zip(span, yours)], t["erosion"]))
+
+    body.append(_text(x1 + 10, Y(float(sea.iloc[-1])) + 4,
+                      f"ocean freight {sea.iloc[-1]:.0f}", 12, t["anchor"], weight="600"))
+    body.append(_text(x1 + 10, Y(float(yours.iloc[-1])) + 4,
+                      f"you {yours.iloc[-1]:.0f}", 12, t["erosion"], weight="600"))
+    body.append(_text(x1 + 10, Y(float(port.iloc[-1])) - 8,
+                      f"port handling {port.iloc[-1]:.0f}", 12, aqua, weight="600"))
+
+    for ts in span[::3]:
+        body.append(_text(X(ts), y0 + 18, ts.strftime("%b %y"), 11, t["muted"],
+                          anchor="middle", tabular=True))
+    body.append(_line(x0, y0, x1, y0, t["axis"], 1.2))
+    return _svg(W, H, body)
+
+
 def main() -> int:
     lines = load_cost_lines(ROOT / "examples" / "demo.csv")
     lines = fill_fx(lines, ROOT / "examples", offline_dir=ROOT / "examples")
     contract = load_contract(ROOT / "examples" / "contract.csv")
     market = load_series(ROOT / "examples" / "fred_PCU483111483111.csv")
+    handling = load_series(ROOT / "examples" / "fred_PCU4883204883208.csv")
     OUT.mkdir(parents=True, exist_ok=True)
     for mode in ("light", "dark"):
         (OUT / f"waterfall-{mode}.svg").write_text(chart_waterfall(lines, contract, mode))
         (OUT / f"market-{mode}.svg").write_text(chart_market(lines, market, mode))
         (OUT / f"relabel-{mode}.svg").write_text(chart_relabel(lines, mode))
+        (OUT / f"history-{mode}.svg").write_text(chart_history(market, mode))
+        (OUT / f"benchmarks-{mode}.svg").write_text(chart_benchmarks(lines, market, handling, mode))
         print(f"wrote {mode} charts")
     return 0
 

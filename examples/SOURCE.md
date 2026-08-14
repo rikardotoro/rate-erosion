@@ -9,8 +9,12 @@
 - **`fred_PCU483111483111.csv` is real.** PPI: Deep Sea Freight
   Transportation, produced by the US Bureau of Labor Statistics and served
   by FRED (https://fred.stlouisfed.org/series/PCU483111483111). US
-  government data, public domain. Committed so the demo works offline.
-  Retrieved 2026-08-12 by [`scripts/fetch_benchmark.py`](../scripts/fetch_benchmark.py).
+  government data, public domain. Committed in full (monthly since 1988) so
+  the demo works offline and the README can plot the whole history.
+  Retrieved 2026-08-14 by [`scripts/fetch_benchmark.py`](../scripts/fetch_benchmark.py).
+- **`fred_PCU4883204883208.csv` is real.** PPI: Marine Cargo Handling —
+  container movement (https://fred.stlouisfed.org/series/PCU4883204883208).
+  Same source, same licence, retrieved the same way.
 - **`fred_DEXUSEU.csv` is real.** The Federal Reserve's daily EUR/USD rate
   (H.10 release, https://fred.stlouisfed.org/series/DEXUSEU). US government
   data, public domain. The demo's euro-denominated handling charges are

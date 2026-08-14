@@ -120,6 +120,14 @@ since 1988 — rose 50%. That is exactly the yardstick the verdict needs:
 did carrier pricing broadly rise or fall while your contract ran, and by
 roughly how much.
 
+Thirty-eight years of that survey look like this — and the demo contract
+happens to sit on the wildest stretch in its entire history:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/history-dark.svg">
+  <img alt="Line chart of the Deep Sea Freight producer price index from 1988 to 2026. The index moves gradually for three decades, then surges steeply through 2021 and 2022. A shaded band marks the demo contract window, sitting exactly on the surge." src="docs/charts/history-light.svg" width="760">
+</picture>
+
 Why not the alternatives you may have heard of:
 
 - **The Baltic Dry Index** is the famous one, and it is the wrong one. It
@@ -137,9 +145,22 @@ carriers, it blends contract and spot business, and it is an index rather
 than a dollars-per-container rate. That makes it useless for pricing a
 specific lane — and perfectly adequate for judging the *direction and rough
 size* of the market move behind your contract, which is all the verdict
-claims. Two alternates ship in the registry (`--benchmark` accepts them): the
-PPI for marine container handling, and the Cass Freight Index expenditures
-series, which tracks total freight spend.
+claims.
+
+One more reason the tool makes you choose the benchmark explicitly: even the
+free government surveys are different markets. Over the demo's term, ocean
+freight prices rose 50% while port container-handling fees rose 2%. Your
++13% is a great outcome against the first and a poor one against the second
+— so the choice of yardstick is not a technicality, it is the analysis:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/benchmarks-dark.svg">
+  <img alt="Line chart indexing three series to 100 over the demo term: the ocean freight index ends at 150, your cost ends at 114, and the port handling index ends at 102. The same cost change looks completely different depending on which benchmark sits next to it." src="docs/charts/benchmarks-light.svg" width="760">
+</picture>
+
+Alternates ship in the registry (`--benchmark` accepts them): the container
+handling PPI shown above, and the Cass Freight Index expenditures series,
+which tracks total freight spend.
 
 ## The patterns underneath
 

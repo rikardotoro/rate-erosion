@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="340" viewBox="0 0 760 340" role="img">
+<text x="20.0" y="26.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="16" fill="#0b0b0b" text-anchor="start" font-weight="600" style="">Pick the market you actually buy</text>
+<text x="20.0" y="44.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#52514e" text-anchor="start" font-weight="normal" style="">Both are free government surveys, indexed to 100. They are not the same market.</text>
+<line x1="52.0" y1="280.5" x2="560.0" y2="280.5" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="284.5" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">100</text>
+<line x1="52.0" y1="246.4" x2="560.0" y2="246.4" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="250.4" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">110</text>
+<line x1="52.0" y1="212.3" x2="560.0" y2="212.3" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="216.3" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">120</text>
+<line x1="52.0" y1="178.2" x2="560.0" y2="178.2" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="182.2" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">130</text>
+<line x1="52.0" y1="144.1" x2="560.0" y2="144.1" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="148.1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">140</text>
+<line x1="52.0" y1="110.1" x2="560.0" y2="110.1" stroke="#e1e0d9" stroke-width="1.0"/>
+<text x="44.0" y="114.1" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="end" font-weight="normal" style="font-variant-numeric: tabular-nums;">150</text>
+<path d="M 52.0 280.5 L 82.5 270.9 L 110.1 264.3 L 140.6 252.8 L 170.1 236.9 L 200.7 220.2 L 230.2 216.2 L 260.7 222.7 L 291.2 208.3 L 320.8 196.5 L 351.3 200.5 L 380.8 186.0 L 411.3 184.3 L 441.9 184.1 L 469.4 196.9 L 499.9 160.7 L 529.5 100.4 L 560.0 109.5" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 52.0 280.5 L 82.5 280.2 L 110.1 281.1 L 140.6 281.1 L 170.1 280.9 L 200.7 281.4 L 230.2 280.4 L 260.7 277.3 L 291.2 277.1 L 320.8 274.4 L 351.3 274.4 L 380.8 274.3 L 411.3 273.3 L 441.9 273.4 L 469.4 273.5 L 499.9 273.5 L 529.5 273.3 L 560.0 273.3" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round"/>
+<path d="M 52.0 280.5 L 82.5 282.3 L 110.1 286.4 L 140.6 274.1 L 170.1 274.3 L 200.7 266.6 L 230.2 274.1 L 260.7 246.3 L 291.2 242.6 L 320.8 240.5 L 351.3 264.2 L 380.8 272.3 L 411.3 271.7 L 441.9 267.6 L 469.4 253.7 L 499.9 235.4 L 529.5 244.9 L 560.0 232.5" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round"/>
+<text x="570.0" y="113.5" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#2a78d6" text-anchor="start" font-weight="600" style="">ocean freight 150</text>
+<text x="570.0" y="236.5" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#eb6834" text-anchor="start" font-weight="600" style="">you 114</text>
+<text x="570.0" y="265.3" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="12" fill="#1baf7a" text-anchor="start" font-weight="600" style="">port handling 102</text>
+<text x="52.0" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Jan 21</text>
+<text x="140.6" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Apr 21</text>
+<text x="230.2" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Jul 21</text>
+<text x="320.8" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Oct 21</text>
+<text x="411.3" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Jan 22</text>
+<text x="499.9" y="318.0" font-family="system-ui, -apple-system, Segoe UI, sans-serif" font-size="11" fill="#898781" text-anchor="middle" font-weight="normal" style="font-variant-numeric: tabular-nums;">Apr 22</text>
+<line x1="52.0" y1="300.0" x2="560.0" y2="300.0" stroke="#c3c2b7" stroke-width="1.2"/>
+</svg>
