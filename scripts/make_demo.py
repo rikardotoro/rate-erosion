@@ -26,6 +26,10 @@ def main() -> int:
         baf = 380.0 + t * 80.0                           # bunker creep
         creep = 1.0 + t * 0.025                          # base over-billing 0 → 2.5%
 
+        # the shuffle: from 2021-10 a "new" LSS code appears while BAF drops by
+        # the same amount — the all-in is untouched, money just changes labels
+        lss = 130.0 if m_index >= 9 else 0.0
+
         for i in range(rng.integers(55, 66)):
             lane = "CNSHA-NLRTM" if rng.random() < mix_dear else "CNSHA-USLAX"
             sid = f"{month}-{i:03d}"
@@ -39,7 +43,9 @@ def main() -> int:
                              "currency": currency})
 
             line("BAS", LANES[lane] * creep * rng.normal(1.0, 0.01))
-            line("BAF", baf * rng.normal(1.0, 0.05))
+            line("BAF", (baf - lss) * rng.normal(1.0, 0.05))
+            if lss:
+                line("LSS", lss * rng.normal(1.0, 0.03))
             line("THC", 220.0 * rng.normal(1.0, 0.03), currency="EUR")
             line("DOC", 45.0)
             if str(month) in PSS_MONTHS:

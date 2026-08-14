@@ -7,6 +7,7 @@ from rich.table import Table
 from rate_erosion.benchmark import pct_change, verdict
 from rate_erosion.data import parse_period, split_periods
 from rate_erosion.decompose import converted, shipment_count, variance, waterfall
+from rate_erosion.patterns import detect_shuffle, rate_regimes
 
 
 @dataclass
@@ -21,6 +22,8 @@ class Analysis:
     effects: dict[str, float]
     yours_pct: float
     benchmark: dict | None
+    regimes: list[dict]
+    shuffle: dict | None
 
 
 def analyse(
@@ -57,12 +60,16 @@ def analyse(
         effects=variance(base, cur),
         yours_pct=yours_pct,
         benchmark=bench,
+        regimes=rate_regimes(lines),
+        shuffle=detect_shuffle(lines),
     )
 
 
 def to_dict(analysis: Analysis) -> dict:
     payload = asdict(analysis)
     payload["waterfall"] = [[label, value] for label, value in analysis.waterfall]
+    if analysis.shuffle:
+        payload["shuffle"] = {**analysis.shuffle, "pair": list(analysis.shuffle["pair"])}
     return payload
 
 
@@ -97,4 +104,17 @@ def render(analysis: Analysis) -> None:
         console.print(
             f"The market ({b['title']}) moved {b['market']:+.1%} over the same window "
             f"— you [bold]{word} by {abs(b['outperformance']):.1%} points[/bold]."
+        )
+
+    for regime in analysis.regimes[:4]:
+        console.print(
+            f"All-in per shipment stepped {regime['step_pct']:+.1%} in {regime['month']} "
+            f"({regime['before']:,.0f} → {regime['after']:,.0f})."
+        )
+    if analysis.shuffle:
+        a, b_code = analysis.shuffle["pair"]
+        console.print(
+            f"[yellow]Component shuffle:[/yellow] {a} and {b_code} move in opposition "
+            f"(correlation {analysis.shuffle['correlation']:+.2f}) while their sum "
+            "barely moves. Money is being relabelled, not saved."
         )

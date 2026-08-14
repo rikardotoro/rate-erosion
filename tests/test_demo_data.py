@@ -38,3 +38,15 @@ def test_demo_is_reproducible():
 def test_offline_fred_slice_loads():
     series = load_series(EXAMPLES / "fred_PCU483111483111.csv")
     assert len(series) > 24
+
+
+def test_demo_shuffle_is_detected():
+    """The planted BAF-to-LSS relabelling must be caught on the demo data."""
+    from rate_erosion.benchmark import fill_fx
+    from rate_erosion.patterns import detect_shuffle
+
+    lines = load_cost_lines(EXAMPLES / "demo.csv")
+    lines = fill_fx(lines, EXAMPLES, offline_dir=EXAMPLES)
+    result = detect_shuffle(lines)
+    assert result is not None
+    assert set(result["pair"]) == {"BAF", "LSS"}
