@@ -73,48 +73,98 @@ def to_dict(analysis: Analysis) -> dict:
     return payload
 
 
+# common charge codes, spelled out so the reader never has to know the jargon
+GLOSSARY = {
+    "BAF": "fuel surcharge",
+    "LSS": "low-sulphur fuel surcharge",
+    "THC": "terminal handling",
+    "PSS": "peak season surcharge",
+    "DOC": "documentation fee",
+    "CAF": "currency adjustment",
+    "ISPS": "port security fee",
+    "EBS": "emergency fuel surcharge",
+    "AMS": "customs filing fee",
+}
+
+EFFECT_LABELS = {
+    "volume": "Number of shipments (volume)",
+    "price": "What carriers charged (price)",
+    "mix": "Which lanes you used (mix)",
+    "fx": "Exchange rates (FX)",
+}
+
+
+def _friendly_period(label: str) -> str:
+    start, end = parse_period(label)
+    if start.year == end.year:
+        return f"{start.strftime('%b')}–{end.strftime('%b %Y')}"
+    return f"{start.strftime('%b %Y')}–{end.strftime('%b %Y')}"
+
+
+def _friendly_month(label: str) -> str:
+    return pd.Period(label).to_timestamp().strftime("%b %Y")
+
+
+def _step_label(label: str) -> str:
+    spelled = GLOSSARY.get(label)
+    return f"{label} — {spelled}" if spelled else label
+
+
 def render(analysis: Analysis) -> None:
     console = Console()
 
-    table = Table(title=f"Per shipment, {analysis.current}")
+    table = Table(title=f"What one shipment cost you, {_friendly_period(analysis.current)}")
     table.add_column("Step")
     table.add_column("$ / shipment", justify="right")
     for label, value in analysis.waterfall:
         anchor = label in ("Contracted base", "Realised all-in")
         text = f"{value:,.0f}" if anchor else f"{value:+,.0f}"
-        table.add_row(label, text, style="bold" if anchor else None)
+        table.add_row(_step_label(label), text, style="bold" if anchor else None)
     console.print(table)
+    console.print(
+        "Top row: the rate you negotiated. Bottom row: what you actually paid. "
+        "Every line in between is a piece of the gap."
+    )
 
-    effects = Table(title="Total spend change")
-    effects.add_column("Effect")
+    effects = Table(
+        title=f"Why total spend changed, {_friendly_period(analysis.baseline)} → "
+              f"{_friendly_period(analysis.current)}"
+    )
+    effects.add_column("Reason")
     effects.add_column("$", justify="right")
     for key in ("volume", "price", "mix", "fx"):
-        effects.add_row(key.capitalize(), f"{analysis.effects[key]:+,.0f}")
-    effects.add_row("Total", f"{analysis.effects['total_change']:+,.0f}", style="bold")
+        effects.add_row(EFFECT_LABELS[key], f"{analysis.effects[key]:+,.0f}")
+    effects.add_row("Total change", f"{analysis.effects['total_change']:+,.0f}", style="bold")
     console.print(effects)
+    console.print("The four reasons add up to the total exactly — nothing is left over.")
 
     console.print(
-        f"\nRealised cost per shipment moved [bold]{analysis.yours_pct:+.1%}[/bold] "
-        f"({analysis.n_base} shipments in {analysis.baseline}, "
-        f"{analysis.n_cur} in {analysis.current})."
+        f"\nYour cost per shipment moved [bold]{analysis.yours_pct:+.1%}[/bold] "
+        f"between the two periods ({analysis.n_base} shipments, then {analysis.n_cur})."
     )
     if analysis.benchmark:
         b = analysis.benchmark
-        word = "outperformed" if b["outperformance"] >= 0 else "underperformed"
+        word = "better" if b["outperformance"] >= 0 else "worse"
         console.print(
-            f"The market ({b['title']}) moved {b['market']:+.1%} over the same window "
-            f"— you [bold]{word} by {abs(b['outperformance']):.1%} points[/bold]."
+            f"The market ({b['title']}) moved {b['market']:+.1%} over the same time. "
+            f"You did [bold]{abs(b['outperformance']):.1%} points {word} than the "
+            "market[/bold]."
         )
 
     for regime in analysis.regimes[:4]:
         console.print(
-            f"All-in per shipment stepped {regime['step_pct']:+.1%} in {regime['month']} "
-            f"({regime['before']:,.0f} → {regime['after']:,.0f})."
+            f"Your all-in rate stepped {regime['step_pct']:+.1%} in "
+            f"{_friendly_month(regime['month'])} "
+            f"({regime['before']:,.0f} → {regime['after']:,.0f} per shipment)."
         )
     if analysis.shuffle:
+        def prose(code: str) -> str:
+            spelled = GLOSSARY.get(code)
+            return f"{code} ({spelled})" if spelled else code
+
         a, b_code = analysis.shuffle["pair"]
         console.print(
-            f"[yellow]Component shuffle:[/yellow] {a} and {b_code} move in opposition "
-            f"(correlation {analysis.shuffle['correlation']:+.2f}) while their sum "
-            "barely moves. Money is being relabelled, not saved."
+            f"[yellow]Worth a look:[/yellow] {prose(a)} and {prose(b_code)} mirror "
+            "each other month by month while their sum stays flat. That usually "
+            "means money was relabelled between charge codes, not saved."
         )

@@ -4,18 +4,21 @@
 
 **You negotiated −8%. You paid +3%. Here is where it went.**
 
-A negotiated rate reduction is a headline, not an outcome. Over the contract
-term it erodes — the base gets quietly over-billed, surcharges creep, a
-peak-season charge appears, the exchange rate moves, and your traffic drifts
-toward the expensive lane. None of that shows up in a report that compares
-"contracted rate" to "contracted rate". This tool reads your cost lines,
-decomposes the gap between what you signed and what you actually paid, and
-then answers the question that decides whether procurement did a good job:
-**how did you do against the market?**
+You negotiate a rate reduction with your carrier, and a year later the invoices
+say you are paying more than before. This happens constantly, and it is rarely
+one big thing. The base rate gets billed a little high. The fuel surcharge
+creeps. A "peak season surcharge" appears for a few months. A charge billed in
+euros moves with the exchange rate. And your own shipments drift toward the
+more expensive route. Each piece is small; together they eat the discount.
+
+This tool reads your cost lines — one row per charge on each shipment — and
+splits the gap between the rate you signed and the money you actually paid,
+piece by piece. Then it answers the question that decides whether the
+negotiation was actually good: **how did you do compared to the market?**
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/waterfall-dark.svg">
-  <img alt="Waterfall chart of per-shipment cost: a contracted base of 2,199 dollars builds up through base rate creep, bunker surcharge, terminal handling, peak season surcharge and documentation fees to a realised all-in cost of 3,175 dollars." src="docs/charts/waterfall-light.svg" width="760">
+  <img alt="Waterfall chart of per-shipment cost: a contracted base of 2,189 dollars builds up through base rate creep, fuel surcharge, terminal handling, peak season surcharge, low-sulphur surcharge and documentation fees to a realised all-in cost of 3,175 dollars." src="docs/charts/waterfall-light.svg" width="760">
 </picture>
 
 ## The 30-second version
@@ -26,125 +29,122 @@ uvx --from git+https://github.com/rikardotoro/rate-erosion rate-erosion --demo
 
 <!-- BEGIN OUTPUT -->
 ```
-Per shipment, 2022-04:2022-06   
-┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
-┃ Step            ┃ $ / shipment ┃
-┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
-│ Contracted base │        2,189 │
-│ Base rate creep │          +50 │
-│ BAF             │         +326 │
-│ THC             │         +235 │
-│ PSS             │         +200 │
-│ LSS             │         +130 │
-│ DOC             │          +45 │
-│ Realised all-in │        3,175 │
-└─────────────────┴──────────────┘
- Total spend change 
-┏━━━━━━━━┳━━━━━━━━━┓
-┃ Effect ┃       $ ┃
-┡━━━━━━━━╇━━━━━━━━━┩
-│ Volume │ -14,003 │
-│ Price  │ +55,948 │
-│ Mix    │ +16,258 │
-│ Fx     │  -5,504 │
-│ Total  │ +52,700 │
-└────────┴─────────┘
+What one shipment cost you, Apr–Jun 2022      
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┓
+┃ Step                             ┃ $ / shipment ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━┩
+│ Contracted base                  │        2,189 │
+│ Base rate creep                  │          +50 │
+│ BAF — fuel surcharge             │         +326 │
+│ THC — terminal handling          │         +235 │
+│ PSS — peak season surcharge      │         +200 │
+│ LSS — low-sulphur fuel surcharge │         +130 │
+│ DOC — documentation fee          │          +45 │
+│ Realised all-in                  │        3,175 │
+└──────────────────────────────────┴──────────────┘
+Top row: the rate you negotiated. Bottom row: what you actually paid. Every line
+in between is a piece of the gap.
+  Why total spend changed, Jan–Mar 2021 →  
+               Apr–Jun 2022                
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┓
+┃ Reason                        ┃       $ ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━┩
+│ Number of shipments (volume)  │ -14,003 │
+│ What carriers charged (price) │ +55,948 │
+│ Which lanes you used (mix)    │ +16,258 │
+│ Exchange rates (FX)           │  -5,504 │
+│ Total change                  │ +52,700 │
+└───────────────────────────────┴─────────┘
+The four reasons add up to the total exactly — nothing is left over.
 
-Realised cost per shipment moved +13.4% (183 shipments in 2021-01:2021-03, 178 
-in 2022-04:2022-06).
+Your cost per shipment moved +13.4% between the two periods (183 shipments, then
+178).
 The market (PPI: Deep Sea Freight Transportation (BLS)) moved +50.2% over the 
-same window — you outperformed by 36.8% points.
-All-in per shipment stepped +9.8% in 2021-08 (2,851 → 3,131).
-All-in per shipment stepped -6.0% in 2021-11 (3,131 → 2,942).
-All-in per shipment stepped +8.0% in 2022-04 (2,942 → 3,176).
-Component shuffle: BAF and LSS move in opposition (correlation -1.00) while 
-their sum barely moves. Money is being relabelled, not saved.
+same time. You did 36.8% points better than the market.
+Your all-in rate stepped +9.8% in Aug 2021 (2,851 → 3,131 per shipment).
+Your all-in rate stepped -6.0% in Nov 2021 (3,131 → 2,942 per shipment).
+Your all-in rate stepped +8.0% in Apr 2022 (2,942 → 3,176 per shipment).
+Worth a look: BAF (fuel surcharge) and LSS (low-sulphur fuel surcharge) mirror 
+each other month by month while their sum stays flat. That usually means money 
+was relabelled between charge codes, not saved.
 ```
 <!-- END OUTPUT -->
 
-Three answers in one screen: **where** the money went (the waterfall),
-**why** total spend moved (volume, price, mix, FX — summing exactly to the
-total, no unexplained residual), and **whether to be angry about it** (the
-market verdict).
+Three answers in one screen. The first table shows **where** the money went:
+from the rate you negotiated at the top to what you actually paid at the
+bottom, with every surcharge spelled out in between. The second shows **why**
+your total spend changed, split into four reasons that add up exactly. The
+last lines tell you **whether to be upset about it** — and in the demo, the
+answer is no: costs rose 13%, but the market rose 50%.
 
-## Why "contracted vs paid" is the wrong comparison
+## Two mistakes most cost reviews make
 
-Two separate mistakes hide in most freight cost reviews:
+**Mistake 1: treating the gap as one number.** "We are paying 14% more per
+shipment" doesn't tell anyone what to do. Is the carrier over-billing the
+base rate? Is it fuel? Is it your own traffic moving to the expensive route?
+Each of those has a different owner and a different fix, so the tool keeps
+them apart.
 
-1. **The gap is treated as one number.** "We're paying 14% more per box" is
-   not actionable. *Which part* is the carrier over-billing the base, which
-   part is bunker, which part is your own lane mix shifting? Each has a
-   different owner and a different fix. The waterfall above splits the demo's
-   gap into six named pieces.
-
-2. **The change is compared to nothing.** In the demo, realised cost per
-   shipment rises 14% over the contract term — sounds like a procurement
-   failure. Over the same window the market rose 50%. Locking a contract that
-   only leaked 14 points in that market was an excellent outcome, and a
-   report that can't say so punishes the people who earned it. Erosion and
-   outperformance are different questions; you need both answers.
+**Mistake 2: comparing your costs to nothing.** In the demo, cost per
+shipment rises 13% over the contract. On its own that looks like a failure.
+But over the same 18 months the market price of ocean freight rose 50% — so
+whoever locked that contract saved the company a fortune, and a report that
+only shows "+13%" punishes them for it. The comparison uses a free public
+index (the US producer price index for deep sea freight, from FRED), so
+there is nothing to subscribe to.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/market-dark.svg">
-  <img alt="Line chart indexing your per-shipment cost against the Deep Sea Freight PPI, both starting at 100 in January 2021. Your cost ends at 114 while the market ends at 150 — the gap is the outperformance." src="docs/charts/market-light.svg" width="760">
+  <img alt="Line chart indexing your per-shipment cost against the Deep Sea Freight producer price index, both starting at 100 in January 2021. Your cost ends at 114 while the market ends at 150 — the gap is your outperformance." src="docs/charts/market-light.svg" width="760">
 </picture>
 
-There is a third, quieter mistake: **letting FX and mix pollute the price
-line.** A euro-denominated handling charge that didn't change in euros is not
-a rate increase, and more shipments on the expensive lane is not a carrier
-price rise. The tool revalues both periods at constant exchange rates and
-splits mix from price with the standard variance identity, so each effect
-lands in its own row — and the four rows sum to the total change exactly.
-You don't have to supply the exchange rates: when a line has a currency but
-no `fx_rate`, the tool looks up the Federal Reserve's actual daily rate for
-that date (15 major currencies, cached locally). In the demo, the FX row is
-the real 2021-22 euro slide showing up in euro-billed handling charges.
+There is a quieter third mistake: letting currency and route changes pollute
+the numbers. A charge billed in euros that didn't change *in euros* is not a
+price increase — the exchange rate moved, not the carrier. And more shipments
+on an expensive route is not a rate rise either. The tool separates both out,
+so the "price" line only ever contains actual price changes. You don't even
+need to supply exchange rates: it looks up the Federal Reserve's real daily
+rate for each line's date (15 major currencies, cached locally).
 
 ## The patterns underneath
 
-Two more questions the tables above cannot answer, so the tool checks for
-them on the full history:
+Two things you can't see in a summary table, so the tool checks the full
+month-by-month history for them:
 
-**When did the rate actually move?** The monthly all-in is segmented into
-regimes with a changepoint detector, so instead of "costs went up" you get
-dates and magnitudes: in the demo, +9.8% in August 2021, back down −6.0% in
-November, up again +8.0% in April 2022 — which is the peak-season surcharge
-switching on and off, caught from the numbers alone.
+**When did the rate actually move?** Instead of "costs went up", you get
+dates and sizes. In the demo: up 9.8% in August 2021, back down 6% in
+November, up 8% again in April 2022 — which is a peak-season surcharge
+switching on and off, found from the numbers alone.
 
-**Is money being relabelled?** The classic way around a rate cap is to lower
-one charge and introduce another for the same amount. The all-in stays flat,
-the cap is technically honoured, and a report that only tracks totals sees
-nothing. The signature is mechanical: two components whose month-over-month
-moves cancel each other. In the demo, a new LSS code appears in October 2021
-for exactly what BAF gave up, and the tool calls it out:
-
-> Component shuffle: BAF and LSS move in opposition (correlation −1.00) while
-> their sum barely moves. Money is being relabelled, not saved.
+**Is money being relabelled?** A common way around a negotiated price cap:
+lower one charge and introduce a new one for the same amount. The total stays
+flat, the cap is technically respected, and a report that tracks only totals
+sees nothing. The tool looks for pairs of charges that mirror each other
+month after month. In the demo, a "new" low-sulphur surcharge appears in
+October 2021 for exactly what the fuel surcharge gave up:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/charts/relabel-dark.svg">
-  <img alt="Line chart of monthly bunker-related charges per shipment. The BAF line drops sharply in October 2021 exactly when a new LSS line appears, while the dashed line of their sum continues smoothly upward as if nothing happened." src="docs/charts/relabel-light.svg" width="760">
+  <img alt="Line chart of monthly fuel-related charges per shipment. The fuel surcharge line drops sharply in October 2021 exactly when a new low-sulphur surcharge line appears, while the dashed line of their sum continues smoothly as if nothing happened." src="docs/charts/relabel-light.svg" width="760">
 </picture>
 
-Neither check fits in a spreadsheet formula, which is why they are in the
-tool rather than in the recipes below.
+When that happens, the tool says so in plain words: *money was relabelled
+between charge codes, not saved.*
 
 ## Do this in your own tools
 
-You don't need this tool to stop reporting one blended number. The pieces are
-one formula away in whatever you already use:
+You don't need this tool to stop reporting one blended number. The basic
+pieces are one formula away in whatever you already use:
 
-**Excel**
-
-Per-shipment cost of each charge type — a pivot of amount by charge code, or:
+**Excel** — a pivot of amount by charge code, per quarter, is already the
+waterfall. Per-shipment cost of one charge type:
 
 ```
 =SUMIFS(amount, charge_code, "BAF") / SUMPRODUCT(1/COUNTIF(shipments, shipments))
 ```
 
-Build it once per period and the waterfall is a bar chart away.
-
-**Power BI (DAX)**
+**Power BI (DAX)** — the price effect for each lane, which is the heart of a
+price/volume/mix split:
 
 ```
 Price Effect :=
@@ -154,11 +154,11 @@ SUMX(
 )
 ```
 
-Mix and volume follow the same `SUMX` pattern with the reference costs
-swapped — this is textbook price/volume/mix variance, which is exactly the
-point: it's a core BI technique that freight reporting rarely uses.
+Mix and volume follow the same pattern with the reference values swapped.
+This is a standard business-intelligence technique — the point is that
+freight reporting almost never uses it.
 
-**SQL**
+**SQL** — cost per shipment by charge type for one period:
 
 ```sql
 SELECT charge_code,
@@ -171,37 +171,36 @@ ORDER BY per_shipment DESC;
 
 Run it for both periods and subtract.
 
-None of these stop FX or lane mix from polluting the price line, and none of
-them benchmark you against the market — isolating the effects exactly and
-attaching the FRED verdict is what the tool adds.
+What none of these do: keep exchange rates and route changes out of the price
+line, benchmark you against the market, or catch the relabelling trick. Those
+are the parts the tool adds.
 
 ## Five ways to get this wrong
 
-Each is a real mistake from real cost reviews, and each has a test proving
-the failure mode:
+These are real mistakes from real cost reviews. Each one has a test in this
+repo that reproduces the failure:
 
 1. **Reaching for the Baltic Dry Index because it's the famous one.** It
-   measures dry bulk — iron ore, grain, coal — not containers. The tool
-   refuses it, by name, and tells you why.
+   tracks bulk goods — iron ore, grain, coal — not containers. The tool
+   refuses it by name and explains why.
    → [`tests/test_benchmark.py::test_baltic_dry_index_is_refused_with_explanation`](tests/test_benchmark.py)
 
-2. **Booking a mix shift as a price change.** If per-lane prices are flat and
-   your volume moved to the dear lane, the price effect must be zero.
+2. **Calling a route change a price change.** If per-lane prices are flat and
+   your volume moved to the dear lane, the price effect must be exactly zero.
    → [`tests/test_decompose.py::test_mix_shift_is_not_booked_as_price`](tests/test_decompose.py)
 
-3. **Booking FX movement as a rate change.** A charge that didn't move in its
-   own currency is not a carrier increase.
+3. **Calling a currency move a price change.** A charge that didn't move in
+   its own currency is not a carrier increase.
    → [`tests/test_decompose.py::test_fx_movement_is_not_a_rate_change`](tests/test_decompose.py)
 
-4. **Comparing your rate change to nothing.** +14% is a disaster in a flat
-   market and a triumph in 2021-22. The verdict is relative or it is
-   meaningless.
+4. **Comparing your rate change to nothing.** +13% is a disaster in a flat
+   market and a triumph in 2021-22. Without the market next to it, the number
+   means nothing.
    → [`tests/test_benchmark.py::test_verdict_reports_relative_points`](tests/test_benchmark.py)
 
-5. **Trusting a flat all-in.** Components can be relabelled underneath it —
-   one charge down, a new one up by the same amount — which is how a rate cap
-   gets managed instead of honoured. The tool tests components for offsetting
-   movement.
+5. **Trusting a flat total.** Charges can be relabelled underneath it — one
+   down, a new one up by the same amount. That is how a price cap gets
+   managed instead of honoured.
    → [`tests/test_patterns.py::test_planted_shuffle_is_detected`](tests/test_patterns.py)
 
 ## Run it
@@ -213,55 +212,51 @@ uvx --from git+https://github.com/rikardotoro/rate-erosion rate-erosion \
   --baseline 2025-01:2025-03 --current 2026-04:2026-06
 ```
 
-**Cost lines CSV** (column names auto-detected from common aliases; force any
-mapping with `--map canonical=your_column`):
+**Cost lines CSV** — one row per charge on each shipment. Column names are
+auto-detected from common aliases; force any of them with
+`--map canonical=your_column`:
 
 | Column | Required | Meaning |
 |---|---|---|
-| `shipment` | yes | Shipment / BL / container reference |
+| `shipment` | yes | Shipment / bill-of-lading / container reference |
 | `date` | yes | Charge or invoice date |
-| `lane` | yes | Trade lane the shipment moved on |
-| `charge_code` | yes | BAS, BAF, THC, PSS… base codes fold into "base" |
-| `amount` | yes | Charge amount in its own currency |
+| `lane` | yes | The route the shipment moved on |
+| `charge_code` | yes | BAS, BAF, THC… base-rate codes are grouped as "base" |
+| `amount` | yes | Charge amount, in its own currency |
 | `currency` | no | Defaults to USD |
-| `fx_rate` | no | USD per unit of line currency. Omit it and the tool fills it from the Fed's daily H.10 rates by line date; supply it only to override |
+| `fx_rate` | no | Leave it out — the tool fills it from the Fed's daily rates |
 
-**Contract CSV**: `lane`, `base_rate` (per shipment, contract currency).
+**Contract CSV** — what you negotiated: `lane`, `base_rate` (per shipment).
 
-Options: `--baseline`/`--current` pick the comparison windows (default:
-first vs last three months of the data); `--benchmark` picks the FRED series
-(`PCU483111483111` deep-sea PPI by default, `PCU4883204883208` container
-handling, `FRGSHPUSM649NCIS` Cass shipments, or `none`); `--json` for
-machine-readable output.
+Options: `--baseline` and `--current` pick the two periods to compare
+(default: first vs last three months of your data). `--benchmark` picks the
+market index — the deep-sea producer price index by default, `none` to skip.
+`--json` for machine-readable output.
 
 ## What this doesn't do
 
-- **It does not tell you whether a surcharge was legitimate.** It tells you
-  which surcharge ate your savings; arguing about it is your job.
-- **It needs a contracted rate per lane.** No contract file, no waterfall —
-  the tool has nothing to compare against.
-- **Automatic FX assumes your contract currency is USD.** Billing in a
-  non-USD home currency works, but you must supply the `fx_rate` column
-  yourself — the Fed's rates are quoted against the dollar.
-- **The FRED benchmarks are US PPI-based proxies, not lane-level spot
-  rates.** Professionals use SCFI, WCI or FBX for lane pricing; those are
-  subscription products whose free tiers cover headline values only, so this
-  tool uses genuinely free series and says so.
-- **The demo cost lines are synthetic.** Real invoice-level freight data is
-  effectively never published, so [`scripts/make_demo.py`](scripts/make_demo.py)
-  generates a realistic erosion story with a fixed seed and
-  [`examples/SOURCE.md`](examples/SOURCE.md) discloses it plainly. The market
-  benchmark and the exchange rates in the demo are **real** — the actual BLS
-  Deep Sea Freight PPI, which really did rise 50% over the demo's 2021-22
-  contract term, and the Fed's actual daily EUR/USD rates.
+- **It won't tell you whether a surcharge was legitimate.** It tells you
+  which one ate your savings; the conversation with the carrier is your job.
+- **It needs your contracted rate per lane.** Without the contract file there
+  is nothing to compare against.
+- **The market index is a broad US proxy, not your lane's spot rate.** The
+  indices professionals quote for lane pricing (SCFI, WCI, FBX) are
+  subscription products, so this tool uses genuinely free government data
+  and says so.
+- **The demo cost lines are synthetic.** Real invoice data is never published
+  openly, so [`scripts/make_demo.py`](scripts/make_demo.py) generates a
+  realistic story with a fixed seed and
+  [`examples/SOURCE.md`](examples/SOURCE.md) discloses it. The market data in
+  the demo is real — the actual index, which really did rise 50% over the
+  demo's 2021-22 term — and so are the exchange rates.
 
 ## Is any of this actually tested?
 
-All of it. Every claim in this README is enforced by a test — each trap in
-"Four ways to get this wrong" links to the test that proves it, the
-decomposition's exactness (effects sum to the total, no residual) is itself a
-test, and the demo output above is generated by running the tool, never
-pasted in. The suite runs in CI on every push, against Python 3.11 and 3.12.
+Yes. The exactness claim — four effects that sum to the total with nothing
+left over — is itself a test. So is the planted relabelling in the demo:
+if the detector stopped catching it, CI would fail. Every trap above names
+its test, the demo output is produced by running the tool, and the suite
+runs on every push against Python 3.11 and 3.12.
 
 <details>
 <summary><strong>The full test list</strong> — regenerated by <code>scripts/render_readme_output.py</code>, so it can't drift</summary>
