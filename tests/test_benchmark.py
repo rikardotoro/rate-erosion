@@ -58,3 +58,25 @@ def test_verdict_reports_relative_points():
     """Trap 4: a rate change means nothing until it is compared to the market."""
     result = verdict(yours_pct=0.12, market_pct=0.30)
     assert result["outperformance"] == pytest.approx(0.18)
+
+
+def test_usda_aliases_resolve():
+    assert resolve_series("USDA-DREWRY") == "USDA-DREWRY"
+    assert resolve_series("drewry") == "USDA-DREWRY"
+    assert resolve_series("usda") == "USDA-DREWRY"
+
+
+def test_load_usda_csv_picks_la_40ft(tmp_path):
+    from rate_erosion.benchmark import load_usda_csv
+
+    path = tmp_path / "usda.csv"
+    path.write_text(
+        'Year,Month,Container Size,Origin,Destination,Rate,Date\n'
+        '2022,Jan,20ft container,U.S. West Coast (Los Angeles),Shanghai,$590,Jan 2022\n'
+        '2022,Jan,40ft container,U.S. West Coast (Los Angeles),Shanghai,"$1,780",Jan 2022\n'
+        '2022,Jan,40ft container,U.S. Mid West (Chicago),Shanghai,"$2,900",Jan 2022\n'
+        '2022,Feb,40ft container,U.S. West Coast (Los Angeles),Shanghai,"$1,800",Feb 2022\n'
+    )
+    series = load_usda_csv(path)
+    assert len(series) == 2
+    assert series.loc[pd.Timestamp("2022-01-01")] == 1780.0

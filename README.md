@@ -104,7 +104,10 @@ analysis:
 
 The Baltic Dry Index is refused by name — it tracks bulk cargo, not
 containers. SCFI, WCI and FBX are the right concept but paywalled, so results
-built on them couldn't be checked by readers.
+built on them couldn't be checked by readers. One true dollar rate is
+available: `--benchmark drewry` fetches the USDA-hosted Drewry spot rate for
+Los Angeles→Shanghai 40ft boxes (monthly since 2012, US-export direction,
+fetch-only — Drewry attribution, so no copy ships in this repo).
 
 ## The patterns underneath
 
@@ -219,7 +222,7 @@ the tool. CI runs on 3.11 and 3.12.
 
 <!-- BEGIN TESTS -->
 ```
-60 passed
+62 passed
 
 tests/test_benchmark.py::test_default_series_is_registered PASSED
 tests/test_benchmark.py::test_resolve_accepts_a_known_id PASSED
@@ -228,6 +231,8 @@ tests/test_benchmark.py::test_unknown_series_lists_the_supported_ones PASSED
 tests/test_benchmark.py::test_load_series_parses_fredgraph_csv PASSED
 tests/test_benchmark.py::test_pct_change_uses_asof_values PASSED
 tests/test_benchmark.py::test_verdict_reports_relative_points PASSED
+tests/test_benchmark.py::test_usda_aliases_resolve PASSED
+tests/test_benchmark.py::test_load_usda_csv_picks_la_40ft PASSED
 tests/test_cli.py::test_cli_runs_and_reports PASSED
 tests/test_cli.py::test_cli_json_output_is_valid PASSED
 tests/test_cli.py::test_cli_refuses_baltic_dry PASSED

@@ -5,7 +5,8 @@ from typing import Annotated
 import typer
 from rich.console import Console
 
-from rate_erosion.benchmark import SERIES, fetch_series, fill_fx, load_series, resolve_series
+from rate_erosion.benchmark import (USDA_ID, SERIES, fetch_series, fetch_usda,
+                                    fill_fx, load_series, resolve_series)
 from rate_erosion.data import load_contract, load_cost_lines
 from rate_erosion.errors import RateErosionError
 from rate_erosion.report import analyse, render, to_dict
@@ -46,7 +47,9 @@ def main(
         if benchmark.lower() != "none":
             series_id = resolve_series(benchmark)
             offline = EXAMPLES / f"fred_{series_id}.csv"
-            if demo and offline.exists():
+            if series_id == USDA_ID:
+                market = fetch_usda(CACHE)  # fetch-only: Drewry attribution
+            elif demo and offline.exists():
                 market = load_series(offline)
             else:
                 market = fetch_series(series_id, CACHE)

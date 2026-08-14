@@ -7,17 +7,22 @@ import pandas as pd
 
 from rate_erosion.errors import InsufficientDataError, UnknownSeriesError
 
+USDA_ID = "USDA-DREWRY"
+
 SERIES: dict[str, str] = {
     "PCU483111483111": "PPI: Deep Sea Freight Transportation (BLS)",
     "PCU4883204883208": "PPI: Marine Cargo Handling — Containers (BLS)",
     "FRGEXPUSM649NCIS": "Cass Freight Index: Expenditures",
+    USDA_ID: "USDA/Drewry container spot rate, Los Angeles→Shanghai 40ft",
 }
 
 DEFAULT_SERIES = "PCU483111483111"
 
 _BALTIC = {"bdi", "baltic", "balticdry", "balticdryindex"}
+_USDA = {"usda", "drewry", "usdadrewry", "containerspot"}
 
 FRED_URL = "https://fred.stlouisfed.org/graph/fredgraph.csv?id={sid}"
+USDA_URL = "https://agtransport.usda.gov/api/v3/views/dtp5-fwp8/export.csv?accessType=DOWNLOAD"
 
 
 def _norm(name: str) -> str:
@@ -31,6 +36,8 @@ def resolve_series(name: str) -> str:
             "not containers. It is the famous one, and it is the wrong one. "
             f"Supported series: {', '.join(SERIES)}."
         )
+    if _norm(name) in _USDA:
+        return USDA_ID
     for sid in SERIES:
         if _norm(name) == _norm(sid):
             return sid
@@ -38,6 +45,43 @@ def resolve_series(name: str) -> str:
         f"unknown series {name!r}. Supported: "
         + "; ".join(f"{sid} ({title})" for sid, title in SERIES.items())
     )
+
+
+def load_usda_csv(source: Path) -> pd.Series:
+    """Monthly LA→Shanghai 40ft spot rate from the USDA AgTransport export."""
+    frame = pd.read_csv(source)
+    picked = frame[
+        frame["Container Size"].str.startswith("40ft")
+        & frame["Origin"].str.contains("Los Angeles")
+    ]
+    rates = pd.to_numeric(
+        picked["Rate"].str.replace(r"[$,]", "", regex=True), errors="coerce"
+    )
+    series = pd.Series(
+        rates.values,
+        index=pd.to_datetime(picked["Date"], format="%b %Y"),
+        name=USDA_ID,
+    ).dropna().sort_index()
+    if series.empty:
+        raise InsufficientDataError(f"{source} contains no usable USDA rate rows")
+    return series
+
+
+def fetch_usda(cache_dir: Path) -> pd.Series:
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache = cache_dir / "usda_dtp5-fwp8.csv"
+    try:
+        with urlopen(USDA_URL, timeout=60) as response:
+            cache.write_bytes(response.read())
+    except (URLError, OSError):
+        if not cache.exists():
+            raise InsufficientDataError(
+                "could not reach the USDA AgTransport API and no cached copy "
+                "exists. This series is fetch-only (Drewry attribution, no "
+                "redistribution) — run once with network access, or pick a "
+                "FRED benchmark."
+            ) from None
+    return load_usda_csv(cache)
 
 
 def load_series(source: Path) -> pd.Series:
