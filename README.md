@@ -208,7 +208,7 @@ machines.
 - Work without your contracted rate per lane.
 - Price a specific lane: the index is a broad US proxy, and says so.
 - Use real invoices in the demo: the cost lines are synthetic (seeded,
-  disclosed in [`examples/SOURCE.md`](examples/SOURCE.md)); the index and
+  disclosed in [`src/rate_erosion/examples/SOURCE.md`](src/rate_erosion/examples/SOURCE.md)); the index and
   exchange rates are real.
 
 ## Is any of this actually tested?

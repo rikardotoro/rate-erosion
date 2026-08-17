@@ -14,9 +14,8 @@ from rate_erosion.report import analyse, render, to_dict
 app = typer.Typer(add_completion=False, help="Where your negotiated rate actually went.")
 console = Console()
 
-EXAMPLES = Path(__file__).parent.parent.parent / "examples"
+EXAMPLES = Path(__file__).parent / "examples"
 CACHE = Path.home() / ".cache" / "rate-erosion"
-
 
 @app.command()
 def main(
@@ -64,7 +63,6 @@ def main(
         print(json.dumps(to_dict(analysis), indent=2))
     else:
         render(analysis)
-
 
 if __name__ == "__main__":
     app()

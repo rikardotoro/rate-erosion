@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from rate_erosion.benchmark import fetch_series
 
-EXAMPLES = Path(__file__).parent.parent / "examples"
+EXAMPLES = Path(__file__).parent.parent / "src" / "rate_erosion" / "examples"
 SLICES = {
     "PCU483111483111": None,          # full history — the README plots it
     "PCU4883204883208": None,         # full history — container handling PPI

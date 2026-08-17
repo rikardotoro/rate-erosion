@@ -319,11 +319,11 @@ def chart_benchmarks(lines, deep_sea, handling, mode):
 
 
 def main() -> int:
-    lines = load_cost_lines(ROOT / "examples" / "demo.csv")
-    lines = fill_fx(lines, ROOT / "examples", offline_dir=ROOT / "examples")
-    contract = load_contract(ROOT / "examples" / "contract.csv")
-    market = load_series(ROOT / "examples" / "fred_PCU483111483111.csv")
-    handling = load_series(ROOT / "examples" / "fred_PCU4883204883208.csv")
+    lines = load_cost_lines(ROOT / "src" / "rate_erosion" / "examples" / "demo.csv")
+    lines = fill_fx(lines, ROOT / "src" / "rate_erosion" / "examples", offline_dir=ROOT / "src" / "rate_erosion" / "examples")
+    contract = load_contract(ROOT / "src" / "rate_erosion" / "examples" / "contract.csv")
+    market = load_series(ROOT / "src" / "rate_erosion" / "examples" / "fred_PCU483111483111.csv")
+    handling = load_series(ROOT / "src" / "rate_erosion" / "examples" / "fred_PCU4883204883208.csv")
     OUT.mkdir(parents=True, exist_ok=True)
     for mode in ("light", "dark"):
         (OUT / f"waterfall-{mode}.svg").write_text(chart_waterfall(lines, contract, mode))

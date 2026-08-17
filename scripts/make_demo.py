@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OUT = Path(__file__).parent.parent / "examples"
+OUT = Path(__file__).parent.parent / "src" / "rate_erosion" / "examples"
 
 LANES = {"CNSHA-USLAX": 1950.0, "CNSHA-NLRTM": 2450.0}  # contracted base, USD
 MONTHS = pd.period_range("2021-01", "2022-06", freq="M")

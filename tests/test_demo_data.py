@@ -5,7 +5,7 @@ from pathlib import Path
 from rate_erosion.benchmark import load_series
 from rate_erosion.data import load_contract, load_cost_lines
 
-EXAMPLES = Path(__file__).parent.parent / "examples"
+EXAMPLES = Path(__file__).parent.parent / "src" / "rate_erosion" / "examples"
 
 
 def test_demo_files_are_small():
@@ -25,12 +25,12 @@ def test_demo_is_reproducible():
     subprocess.run(
         [sys.executable, "scripts/make_demo.py"],
         capture_output=True, text=True, check=True,
-        cwd=EXAMPLES.parent,
+        cwd=EXAMPLES.parent.parent.parent,
     )
     diff = subprocess.run(
         ["git", "diff", "--exit-code", "--",
-         "examples/demo.csv", "examples/contract.csv"],
-        cwd=EXAMPLES.parent, capture_output=True,
+         "src/rate_erosion/examples/demo.csv", "src/rate_erosion/examples/contract.csv"],
+        cwd=EXAMPLES.parent.parent.parent, capture_output=True,
     )
     assert diff.returncode == 0, "regenerating the demo must produce no git diff"
 
